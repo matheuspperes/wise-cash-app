@@ -43,9 +43,9 @@ export default function TransactionsPage() {
         <li className="flex items-center justify-between py-2" key={item.id}>
           <div>
             <p className="font-medium">{item.name}</p>
-            <p className="text-sm text-slate-500">{item.categoryName} - {formatDateBR(item.transactionDate)}</p>
+            <p className="text-sm text-muted">{item.categoryName} - {formatDateBR(item.transactionDate)}</p>
           </div>
-          <p className={item.type === "income" ? "font-semibold text-emerald-700" : "font-semibold text-red-700"}>
+          <p className={item.type === "income" ? "font-semibold text-emerald-400" : "font-semibold text-danger"}>
             {item.type === "income" ? "+" : "-"} {formatCurrencyBRL(item.amount)}
           </p>
         </li>
@@ -59,7 +59,7 @@ export default function TransactionsPage() {
       <TransactionForm onSaved={load} />
       <TransactionSearch value={q} onChange={setQ} />
       <TransactionFilters value={filters} onChange={setFilters} />
-      <section className="rounded-xl bg-white p-4 shadow-sm">
+      <section className="rounded-xl border border-border bg-surface p-4 shadow-card">
         <h2 className="mb-3 text-lg font-semibold">Lancamentos</h2>
         <ul className="divide-y">{renderedItems}</ul>
       </section>

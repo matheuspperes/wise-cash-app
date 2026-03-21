@@ -1,23 +1,56 @@
-import { ButtonHTMLAttributes, ReactNode } from "react";
+import { cn } from "@/lib/utils";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import { ButtonHTMLAttributes } from "react";
 
-type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
-  children: ReactNode;
-  variant?: "primary" | "secondary" | "danger";
-};
+const buttonVariants = cva(
+  "inline-flex items-center justify-center rounded-lg text-sm font-semibold transition duration-normal",
+  {
+    variants: {
+      variant: {
+        primary: "bg-primary text-white hover:brightness-110",
+        secondary: "bg-surface-alt text-foreground hover:bg-surface",
+        danger: "bg-danger text-white hover:brightness-110",
+        ghost: "bg-transparent text-foreground hover:bg-surface-alt",
+      },
+      size: {
+        sm: "h-8 px-3",
+        md: "h-10 px-4",
+        lg: "h-11 px-5",
+      },
+    },
+    compoundVariants: [
+      {
+        variant: "primary",
+        size: "lg",
+        className: "shadow-card",
+      },
+    ],
+    defaultVariants: {
+      variant: "primary",
+      size: "md",
+    },
+  },
+);
 
-const styles: Record<NonNullable<Props["variant"]>, string> = {
-  primary: "bg-emerald-700 text-white hover:bg-emerald-600",
-  secondary: "bg-slate-200 text-slate-900 hover:bg-slate-300",
-  danger: "bg-red-600 text-white hover:bg-red-500",
-};
+type Props = ButtonHTMLAttributes<HTMLButtonElement> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+  };
 
-export function Button({ children, variant = "primary", className = "", ...props }: Props) {
+export function Button({ asChild, className, variant, size, disabled, ...props }: Props) {
+  const Comp = asChild ? Slot : "button";
+
   return (
-    <button
-      className={`rounded-md px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${styles[variant]} ${className}`}
+    <Comp
+      className={cn(
+        buttonVariants({ variant, size }),
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        disabled && "cursor-not-allowed opacity-60",
+        className,
+      )}
+      disabled={disabled}
       {...props}
-    >
-      {children}
-    </button>
+    />
   );
 }
