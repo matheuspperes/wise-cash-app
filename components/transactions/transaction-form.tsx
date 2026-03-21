@@ -1,16 +1,21 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { Input, Select } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-type FormData = {
-  name: string;
-  type: "income" | "expense";
-  categoryId: string;
-  amount: string;
-  transactionDate: string;
-  notes: string;
-};
+const formSchema = z.object({
+  name: z.string().min(1, "Nome obrigatorio"),
+  type: z.enum(["income", "expense"]),
+  categoryId: z.string().min(1, "Categoria obrigatoria"),
+  amount: z.string().min(1, "Valor obrigatorio"),
+  transactionDate: z.string().min(10, "Data obrigatoria"),
+  notes: z.string().max(500).optional(),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 type Props = {
   onSaved?: () => void;
@@ -19,24 +24,31 @@ type Props = {
 const today = new Date().toISOString().slice(0, 10);
 
 export function TransactionForm({ onSaved }: Props) {
-  const [data, setData] = useState<FormData>({
-    name: "",
-    type: "expense",
-    categoryId: "geral",
-    amount: "",
-    transactionDate: today,
-    notes: "",
+  const {
+    formState: { errors, isSubmitting },
+    handleSubmit,
+    register,
+    reset,
+    setError,
+  } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      type: "expense",
+      categoryId: "geral",
+      amount: "",
+      transactionDate: today,
+      notes: "",
+    },
   });
-  const [error, setError] = useState<string | null>(null);
 
-  async function submit() {
-    setError(null);
-    if (!data.name || !data.amount || !data.transactionDate || !data.categoryId) {
-      setError("Preencha todos os campos obrigatorios.");
+  async function onSubmit(data: FormData) {
+    const amount = Number(data.amount.replace(",", "."));
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setError("amount", { message: "Informe um valor numerico valido." });
       return;
     }
 
-    const amount = Number(data.amount.replace(",", "."));
     const res = await fetch("/api/transactions", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -44,32 +56,54 @@ export function TransactionForm({ onSaved }: Props) {
     });
 
     if (!res.ok) {
-      setError("Nao foi possivel salvar a transacao.");
+      setError("name", { message: "Nao foi possivel salvar a transacao." });
       return;
     }
 
-    setData((prev) => ({ ...prev, name: "", amount: "", notes: "" }));
+    reset({ name: "", type: data.type, categoryId: data.categoryId, amount: "", transactionDate: data.transactionDate, notes: "" });
     onSaved?.();
   }
 
   return (
-    <section className="rounded-xl bg-white p-4 shadow-sm">
+    <section className="rounded-xl border border-border bg-surface p-4 shadow-card">
       <h2 className="mb-3 text-lg font-semibold">Nova transacao</h2>
-      <div className="grid gap-2 md:grid-cols-2">
-        <input className="rounded border p-2" placeholder="Nome" value={data.name} onChange={(e) => setData({ ...data, name: e.target.value })} />
-        <select className="rounded border p-2" value={data.type} onChange={(e) => setData({ ...data, type: e.target.value as "income" | "expense" })}>
-          <option value="income">Ganho</option>
-          <option value="expense">Gasto</option>
-        </select>
-        <input className="rounded border p-2" placeholder="Categoria" value={data.categoryId} onChange={(e) => setData({ ...data, categoryId: e.target.value })} />
-        <input className="rounded border p-2" placeholder="Valor" value={data.amount} onChange={(e) => setData({ ...data, amount: e.target.value })} />
-        <input className="rounded border p-2" type="date" value={data.transactionDate} onChange={(e) => setData({ ...data, transactionDate: e.target.value })} />
-        <input className="rounded border p-2" placeholder="Notas" value={data.notes} onChange={(e) => setData({ ...data, notes: e.target.value })} />
-      </div>
-      {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
-      <Button className="mt-3" onClick={submit} type="button">
-        Salvar
-      </Button>
+      <form className="grid gap-2 md:grid-cols-2" onSubmit={handleSubmit(onSubmit)}>
+        <div>
+          <Input placeholder="Nome" {...register("name")} />
+          {errors.name ? <p className="mt-1 text-xs text-danger">{errors.name.message}</p> : null}
+        </div>
+
+        <div>
+          <Select {...register("type")}>
+            <option value="income">Ganho</option>
+            <option value="expense">Gasto</option>
+          </Select>
+        </div>
+
+        <div>
+          <Input placeholder="Categoria" {...register("categoryId")} />
+          {errors.categoryId ? <p className="mt-1 text-xs text-danger">{errors.categoryId.message}</p> : null}
+        </div>
+
+        <div>
+          <Input inputMode="decimal" placeholder="Valor" {...register("amount")} />
+          {errors.amount ? <p className="mt-1 text-xs text-danger">{errors.amount.message}</p> : null}
+        </div>
+
+        <div>
+          <Input type="date" {...register("transactionDate")} />
+          {errors.transactionDate ? <p className="mt-1 text-xs text-danger">{errors.transactionDate.message}</p> : null}
+        </div>
+
+        <div>
+          <Input placeholder="Notas" {...register("notes")} />
+          {errors.notes ? <p className="mt-1 text-xs text-danger">{errors.notes.message}</p> : null}
+        </div>
+
+        <Button className="md:col-span-2" disabled={isSubmitting} type="submit">
+          {isSubmitting ? "Salvando..." : "Salvar"}
+        </Button>
+      </form>
     </section>
   );
 }
