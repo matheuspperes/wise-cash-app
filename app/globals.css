@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f5f7fa;
+  --card: #ffffff;
+  --text: #12202f;
+  --muted: #526579;
+  --accent: #1f7a5a;
+  --danger: #d64545;
+  --ring: #2f6fb3;
+}
+
+body {
+  background: radial-gradient(circle at top right, #e8f2ff, #f5f7fa 45%);
+  color: var(--text);
+  font-family: "Segoe UI", "Noto Sans", sans-serif;
+}
