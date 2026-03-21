@@ -1,0 +1,13 @@
+id: wise-cash-app-ambience-20260321
+repository_scope: current-repository
+primary_stack: node-nextjs
+secondary_stacks:
+  - python-when-applicable
+constraints:
+  - no-automated-tests
+  - repository-first-execution
+  - low-setup-friction
+priorities:
+  - operational-consistency
+  - fast-onboarding
+  - modern-stable-tooling
