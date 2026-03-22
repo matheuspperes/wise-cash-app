@@ -1,6 +1,6 @@
-import { getMonthlySummaryContext } from "@/lib/repositories/monthly-summary-repository";
+import { getMonthlySummaryContext, listFullExpenseHistoryRows } from "@/lib/repositories/monthly-summary-repository";
 import { listCurrentMonthExpenseRows } from "@/lib/services/current-month-expenses";
-import { buildHistoricalTotalBalance } from "@/lib/services/dashboard-history-mapper";
+import { buildHistoricalTotalBalance, buildMonthlyExpenseHistoryGroups } from "@/lib/services/dashboard-history-mapper";
 import { parseDemoMode } from "@/lib/ui/demo-mode";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -13,6 +13,8 @@ export async function GET(req: NextRequest) {
   const latest = summaryContext.latest;
   const historicalBalance = buildHistoricalTotalBalance(areaSeries);
   const currentMonthExpenses = listCurrentMonthExpenseRows();
+  const fullExpenseHistoryRows = listFullExpenseHistoryRows();
+  const fullExpenseHistoryGroups = buildMonthlyExpenseHistoryGroups(fullExpenseHistoryRows);
 
   return NextResponse.json({
     currentMonth: latest.month,
@@ -20,6 +22,7 @@ export async function GET(req: NextRequest) {
     totals: { income: latest.income, expense: latest.expense },
     historicalBalance,
     currentMonthExpenses,
+    fullExpenseHistoryGroups,
     demoMode,
     hasDemoSeries: areaSeries.some((point) => (point.demoIncome ?? 0) > 0 || (point.demoExpense ?? 0) > 0),
     areaSeries,

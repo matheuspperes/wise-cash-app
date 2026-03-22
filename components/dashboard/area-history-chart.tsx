@@ -2,6 +2,7 @@
 
 import { formatMonthYearLabel } from "@/lib/formatting/ptbr";
 import { uiText } from "@/lib/i18n/ui-text";
+import { buildDynamicChartAxisProfile, formatAxisTickLabel } from "@/lib/services/chart-axis-profile";
 import { motion } from "framer-motion";
 import { memo } from "react";
 import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -59,14 +60,13 @@ function AreaHistoryChartInner({ data, isFetching = false, demoMode = false }: P
   }
 
   const hasDemoSeries = data.some((point) => (point.demoIncome ?? 0) > 0 || (point.demoExpense ?? 0) > 0);
-  const seriesMax = data.reduce((maxValue, point) => {
-    return Math.max(maxValue, point.income, point.expense, point.demoIncome ?? 0, point.demoExpense ?? 0);
-  }, 0);
-  const yAxisMax = seriesMax > 0 ? Math.ceil(seriesMax * 1.1) : 100;
+  const yAxisProfile = buildDynamicChartAxisProfile(
+    data.flatMap((point) => [point.income, point.expense, point.demoIncome ?? 0, point.demoExpense ?? 0]),
+  );
 
   return (
     <div className="h-80 rounded-2xl border border-border bg-surface p-5 shadow-card">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-2 flex items-center justify-between">
         <p className="text-base text-muted">{uiText.chartHistorical}</p>
         <div className="flex items-center gap-3">
           {demoMode && hasDemoSeries ? <span className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted">Demo</span> : null}
@@ -74,7 +74,7 @@ function AreaHistoryChartInner({ data, isFetching = false, demoMode = false }: P
         </div>
       </div>
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ left: 14, right: 18, top: 18, bottom: 14 }}>
+        <AreaChart data={data} margin={{ left: 14, right: 18, top: 10, bottom: 22 }}>
           <defs>
             <linearGradient id="incomeGradient" x1="0" x2="0" y1="0" y2="1">
               <stop offset="5%" stopColor="#66ffc3" stopOpacity={0.7} />
@@ -90,21 +90,22 @@ function AreaHistoryChartInner({ data, isFetching = false, demoMode = false }: P
             axisLine={false}
             dataKey="month"
             padding={{ left: 8, right: 8 }}
-            tickMargin={10}
+            tickMargin={14}
             tick={{ fill: "#9ca7c5", fontSize: 14 }}
             tickFormatter={(value) => formatMonthYearLabel(String(value))}
             tickLine={false}
           />
           <YAxis
             axisLine={false}
-            domain={[0, yAxisMax]}
+            domain={[0, yAxisProfile.axisMax]}
+            ticks={yAxisProfile.ticks}
             tick={{ fill: "#9ca7c5", fontSize: 14 }}
-            tickCount={5}
-            tickFormatter={(value) => `${Math.round(Number(value) / 1000)}k`}
+            tickCount={yAxisProfile.tickCount}
+            tickFormatter={(value) => formatAxisTickLabel(Number(value))}
             tickLine={false}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: "rgba(124, 140, 255, 0.4)" }} />
-          <Legend align="left" verticalAlign="top" wrapperStyle={{ fontSize: 14, paddingBottom: 16 }} />
+          <Legend align="left" verticalAlign="top" wrapperStyle={{ fontSize: 14, paddingBottom: 8 }} />
           <Area animationDuration={420} animationEasing="ease-out" dataKey="income" fill="url(#incomeGradient)" name="Receitas" stroke="#66ffc3" strokeWidth={2} type="monotone" />
           <Area animationDuration={420} animationEasing="ease-out" dataKey="expense" fill="url(#expenseGradient)" name="Despesas" stroke="#ff9aac" strokeWidth={2} type="monotone" />
           {demoMode ? (

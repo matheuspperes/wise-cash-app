@@ -10,7 +10,7 @@ import { NetBalanceCard } from "@/components/dashboard/net-balance-card";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/input";
 import { uiText } from "@/lib/i18n/ui-text";
-import { CurrentMonthExpenseRow, HistoricalTotalBalance } from "@/lib/ui/dashboard-history-types";
+import { CurrentMonthExpenseRow, HistoricalTotalBalance, MonthlyExpenseHistoryGroup } from "@/lib/ui/dashboard-history-types";
 import { parseDemoMode, withDemoMode } from "@/lib/ui/demo-mode";
 import { getVisualDataState } from "@/lib/ui/data-state";
 import { useQuery } from "@tanstack/react-query";
@@ -24,6 +24,7 @@ type Summary = {
   areaSeries: Array<{ month: string; income: number; expense: number; net: number; demoIncome?: number; demoExpense?: number }>;
   historicalBalance: HistoricalTotalBalance;
   currentMonthExpenses: CurrentMonthExpenseRow[];
+  fullExpenseHistoryGroups?: MonthlyExpenseHistoryGroup[];
   totals?: { income: number; expense: number };
   demoMode?: boolean;
   hasDemoSeries?: boolean;
@@ -80,6 +81,13 @@ export function DashboardPageClient() {
     [query.data],
   );
 
+  const transactionsHref = useMemo(() => {
+    const current = new URLSearchParams();
+    const nextParams = withDemoMode(current, demoMode);
+    const queryString = nextParams.toString();
+    return `/transactions${queryString ? `?${queryString}` : ""}`;
+  }, [demoMode]);
+
   return (
     <main className="mx-auto flex max-w-[76.8rem] flex-col gap-5 px-5 pb-28 pt-5 md:pb-5">
       <DashboardHeader demoMode={demoMode} onToggleDemo={handleToggleDemo} />
@@ -104,7 +112,7 @@ export function DashboardPageClient() {
           <option value={12}>12 meses</option>
         </Select>
         <Button asChild className="h-10 w-10 rounded-full bg-[var(--primary-cta)] p-0 text-[1.4rem] leading-none text-white shadow-elevated hover:brightness-110" size="ctaIcon">
-          <Link aria-label="Nova transação" href="/transactions">+</Link>
+          <Link aria-label="Nova transação" href={transactionsHref}>+</Link>
         </Button>
       </div>
 
@@ -123,13 +131,15 @@ export function DashboardPageClient() {
             <NetBalanceCard isFetching={query.isFetching} value={summary.netBalance} />
             <HistoricalTotalBalanceCard balance={summary.historicalBalance} isFetching={query.isFetching} />
           </div>
-          <AreaHistoryChart data={summary.areaSeries} demoMode={demoMode} isFetching={query.isFetching} />
+          <div className="-mt-1">
+            <AreaHistoryChart data={summary.areaSeries} demoMode={demoMode} isFetching={query.isFetching} />
+          </div>
           <CurrentMonthExpensesTable isFetching={query.isFetching} rows={summary.currentMonthExpenses} />
         </motion.div>
       ) : null}
 
       <Button asChild className="fixed bottom-6 right-6 z-20 h-[3.125rem] w-[3.125rem] rounded-full bg-[var(--primary-cta)] p-0 text-[2rem] leading-none text-white shadow-elevated md:hidden" size="ctaIcon">
-        <Link aria-label="Nova transação" href="/transactions">+</Link>
+        <Link aria-label="Nova transação" href={transactionsHref}>+</Link>
       </Button>
     </main>
   );

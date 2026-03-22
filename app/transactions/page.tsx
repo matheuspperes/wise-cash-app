@@ -2,8 +2,10 @@
 
 import { TransactionFilters } from "@/components/transactions/transaction-filters";
 import { TransactionForm } from "@/components/transactions/transaction-form";
+import { MonthlyExpenseHistoryAccordion } from "@/components/transactions/monthly-expense-history-accordion";
 import { TransactionSearch } from "@/components/transactions/transaction-search";
 import { formatCurrencyBRL, formatDateBR } from "@/lib/formatting/ptbr";
+import { MonthlyExpenseHistoryGroup } from "@/lib/ui/dashboard-history-types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 type Tx = {
@@ -17,6 +19,8 @@ type Tx = {
 
 export default function TransactionsPage() {
   const [items, setItems] = useState<Tx[]>([]);
+  const [monthlyExpenseGroups, setMonthlyExpenseGroups] = useState<MonthlyExpenseHistoryGroup[]>([]);
+  const [isLoadingMonthlyHistory, setIsLoadingMonthlyHistory] = useState(false);
   const [q, setQ] = useState("");
   const [filters, setFilters] = useState<{ type?: "income" | "expense"; categoryId?: string; from?: string; to?: string }>({});
 
@@ -33,9 +37,24 @@ export default function TransactionsPage() {
     setItems(json.items ?? []);
   }, [q, filters]);
 
+  const loadMonthlyHistory = useCallback(async () => {
+    setIsLoadingMonthlyHistory(true);
+    try {
+      const res = await fetch("/api/dashboard/summary?months=12");
+      const json = await res.json();
+      setMonthlyExpenseGroups(json.fullExpenseHistoryGroups ?? []);
+    } finally {
+      setIsLoadingMonthlyHistory(false);
+    }
+  }, []);
+
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    loadMonthlyHistory();
+  }, [loadMonthlyHistory]);
 
   const renderedItems = useMemo(
     () =>
@@ -56,13 +75,18 @@ export default function TransactionsPage() {
   return (
     <main className="mx-auto flex max-w-[76.8rem] flex-col gap-5 p-5">
       <h1 className="text-[1.9rem] font-bold">Transações</h1>
-      <TransactionForm onSaved={load} />
+      <TransactionForm
+        onSaved={async () => {
+          await Promise.all([load(), loadMonthlyHistory()]);
+        }}
+      />
       <TransactionSearch value={q} onChange={setQ} />
       <TransactionFilters value={filters} onChange={setFilters} />
       <section className="rounded-2xl border border-border bg-surface p-5 shadow-card">
         <h2 className="mb-4 text-xl font-semibold">Lançamentos</h2>
         <ul className="divide-y">{renderedItems}</ul>
       </section>
+      <MonthlyExpenseHistoryAccordion groups={monthlyExpenseGroups} isLoading={isLoadingMonthlyHistory} />
     </main>
   );
 }
