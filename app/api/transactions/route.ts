@@ -4,6 +4,21 @@ import { createTransactionFromInput } from "@/lib/services/transaction-service";
 import { transactionSchema } from "@/lib/validation/transaction-schema";
 import { NextRequest, NextResponse } from "next/server";
 
+function normalizePayload(body: unknown) {
+  if (!body || typeof body !== "object") {
+    return body;
+  }
+
+  const payload = body as Record<string, unknown>;
+  const observation = payload.observation;
+  const notes = payload.notes;
+
+  return {
+    ...payload,
+    notes: typeof notes === "string" ? notes : typeof observation === "string" ? observation : undefined,
+  };
+}
+
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const params = {
@@ -21,14 +36,14 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const parsed = transactionSchema.safeParse(body);
+    const parsed = transactionSchema.safeParse(normalizePayload(body));
     if (!parsed.success) {
-      return badRequest("Campos invalidos", parsed.error.flatten());
+      return badRequest("Campos da transacao invalidos", parsed.error.flatten());
     }
 
     const transaction = createTransactionFromInput(parsed.data);
     return NextResponse.json({ transaction }, { status: 201 });
   } catch {
-    return internalError();
+    return internalError("Nao foi possivel salvar a transacao no momento.");
   }
 }

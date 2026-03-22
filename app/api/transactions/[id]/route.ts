@@ -4,6 +4,21 @@ import { patchTransaction } from "@/lib/services/transaction-service";
 import { transactionSchema } from "@/lib/validation/transaction-schema";
 import { NextRequest, NextResponse } from "next/server";
 
+function normalizePayload(body: unknown) {
+  if (!body || typeof body !== "object") {
+    return body;
+  }
+
+  const payload = body as Record<string, unknown>;
+  const observation = payload.observation;
+  const notes = payload.notes;
+
+  return {
+    ...payload,
+    notes: typeof notes === "string" ? notes : typeof observation === "string" ? observation : undefined,
+  };
+}
+
 type Ctx = {
   params: Promise<{ id: string }>;
 };
@@ -11,9 +26,9 @@ type Ctx = {
 export async function PATCH(req: NextRequest, ctx: Ctx) {
   const { id } = await ctx.params;
   const body = await req.json();
-  const parsed = transactionSchema.partial().safeParse(body);
+  const parsed = transactionSchema.partial().safeParse(normalizePayload(body));
   if (!parsed.success) {
-    return badRequest("Campos invalidos", parsed.error.flatten());
+    return badRequest("Campos da transacao invalidos", parsed.error.flatten());
   }
 
   const updated = patchTransaction(id, parsed.data);

@@ -2,17 +2,18 @@
 
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
+import { uiText } from "@/lib/i18n/ui-text";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const formSchema = z.object({
-  name: z.string().min(1, "Nome obrigatorio"),
+  name: z.string().min(1, "Nome obrigatório"),
   type: z.enum(["income", "expense"]),
-  categoryId: z.string().min(1, "Categoria obrigatoria"),
-  amount: z.string().min(1, "Valor obrigatorio"),
-  transactionDate: z.string().min(10, "Data obrigatoria"),
-  notes: z.string().max(500).optional(),
+  categoryId: z.string().min(1, "Categoria obrigatória"),
+  amount: z.string().min(1, "Valor obrigatório"),
+  transactionDate: z.string().min(10, "Data obrigatória"),
+  observation: z.string().max(500).optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -38,36 +39,36 @@ export function TransactionForm({ onSaved }: Props) {
       categoryId: "geral",
       amount: "",
       transactionDate: today,
-      notes: "",
+      observation: "",
     },
   });
 
   async function onSubmit(data: FormData) {
     const amount = Number(data.amount.replace(",", "."));
     if (!Number.isFinite(amount) || amount <= 0) {
-      setError("amount", { message: "Informe um valor numerico valido." });
+      setError("amount", { message: "Informe um valor numérico válido." });
       return;
     }
 
     const res = await fetch("/api/transactions", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ...data, amount }),
+      body: JSON.stringify({ ...data, notes: data.observation, amount }),
     });
 
     if (!res.ok) {
-      setError("name", { message: "Nao foi possivel salvar a transacao." });
+      setError("name", { message: "Não foi possível salvar a transação." });
       return;
     }
 
-    reset({ name: "", type: data.type, categoryId: data.categoryId, amount: "", transactionDate: data.transactionDate, notes: "" });
+    reset({ name: "", type: data.type, categoryId: data.categoryId, amount: "", transactionDate: data.transactionDate, observation: "" });
     onSaved?.();
   }
 
   return (
-    <section className="rounded-xl border border-border bg-surface p-4 shadow-card">
-      <h2 className="mb-3 text-lg font-semibold">Nova transacao</h2>
-      <form className="grid gap-2 md:grid-cols-2" onSubmit={handleSubmit(onSubmit)}>
+    <section className="rounded-2xl border border-border bg-surface p-5 shadow-card">
+      <h2 className="mb-4 text-xl font-semibold">Nova transação</h2>
+      <form className="grid gap-3 md:grid-cols-2" onSubmit={handleSubmit(onSubmit)}>
         <div>
           <Input placeholder="Nome" {...register("name")} />
           {errors.name ? <p className="mt-1 text-xs text-danger">{errors.name.message}</p> : null}
@@ -81,7 +82,7 @@ export function TransactionForm({ onSaved }: Props) {
         </div>
 
         <div>
-          <Input placeholder="Categoria" {...register("categoryId")} />
+          <Input placeholder={uiText.category} {...register("categoryId")} />
           {errors.categoryId ? <p className="mt-1 text-xs text-danger">{errors.categoryId.message}</p> : null}
         </div>
 
@@ -96,12 +97,12 @@ export function TransactionForm({ onSaved }: Props) {
         </div>
 
         <div>
-          <Input placeholder="Notas" {...register("notes")} />
-          {errors.notes ? <p className="mt-1 text-xs text-danger">{errors.notes.message}</p> : null}
+          <Input placeholder={uiText.observation} {...register("observation")} />
+          {errors.observation ? <p className="mt-1 text-xs text-danger">{errors.observation.message}</p> : null}
         </div>
 
-        <Button className="md:col-span-2" disabled={isSubmitting} type="submit">
-          {isSubmitting ? "Salvando..." : "Salvar"}
+        <Button className="md:col-span-2 md:max-w-40" disabled={isSubmitting} size="sm" type="submit">
+          {isSubmitting ? "Salvando..." : uiText.save}
         </Button>
       </form>
     </section>

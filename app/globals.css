@@ -9,6 +9,7 @@
   --foreground: #e8ecff;
   --muted: #9ca7c5;
   --primary: #7c8cff;
+  --primary-cta: #6858f6;
   --secondary: #5ba8ff;
   --accent: #9583ff;
   --danger: #ff6a7a;
@@ -19,6 +20,11 @@
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.25rem;
+  --ui-scale-factor: 1.2;
+  --ui-readable-max: 76.8rem;
+  --space-1x: 1rem;
+  --space-1_2x: 1.2rem;
+  --space-2x: 2rem;
 
   --shadow-card: 0 10px 30px rgba(8, 10, 24, 0.24);
   --shadow-elevated: 0 18px 40px rgba(8, 10, 24, 0.36);
@@ -35,6 +41,7 @@
   --foreground: #17213e;
   --muted: #5a6588;
   --primary: #5b68e8;
+  --primary-cta: #4c3eda;
   --secondary: #2f7dde;
   --accent: #6f57db;
   --danger: #d53c53;
@@ -46,8 +53,10 @@
 
 body {
   background:
-    radial-gradient(circle at 10% 5%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 35%),
-    radial-gradient(circle at 95% 0%, color-mix(in srgb, var(--secondary) 18%, transparent), transparent 30%),
+    radial-gradient(circle at 8% 8%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 38%),
+    radial-gradient(circle at 90% 10%, color-mix(in srgb, var(--primary-cta) 24%, transparent), transparent 35%),
+    radial-gradient(circle at 42% 75%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 42%),
+    radial-gradient(circle at 75% 88%, color-mix(in srgb, var(--secondary) 10%, transparent), transparent 45%),
     var(--background);
   color: var(--foreground);
   font-family: var(--font-geist), "Segoe UI", "Noto Sans", sans-serif;

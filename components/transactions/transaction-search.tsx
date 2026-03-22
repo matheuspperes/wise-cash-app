@@ -17,7 +17,7 @@ export function TransactionSearch({ value = "", onChange }: Props) {
 
   return (
     <input
-      className="w-full rounded-xl border border-border bg-surface p-3 text-sm text-foreground shadow-card placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="w-full rounded-2xl border border-border bg-surface p-4 text-base text-foreground shadow-card placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       onChange={(e) => setLocal(e.target.value)}
       placeholder="Buscar por nome, categoria ou notas"
       value={local}
