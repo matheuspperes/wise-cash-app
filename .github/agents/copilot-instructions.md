@@ -12,6 +12,7 @@ Auto-generated from all feature plans. Last updated: 2026-03-22
 - TypeScript 5.8, React 18, Next.js 15 + Tailwind CSS, Recharts, TanStack Query, Framer Motion, react-hook-form, Zod (005-refine-copy-scale-months)
 - N/A (sem mudanca de persistencia; dados continuam via APIs existentes) (005-refine-copy-scale-months)
 - N/A (sem mudanca de persistencia; dados continuam em APIs/repositorios existentes) (006-refine-dashboard-history)
+- N/A (sem mudanca de persistencia; dados continuam em repositorio em memoria/API existente) (007-fix-chart-indicators-history)
 
 - TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x) + Next.js, Tailwind CSS, Shadcn/UI, TanStack Query, Supabase JS, Recharts (001-monthly-finance-manager)
 
@@ -32,9 +33,9 @@ npm test; npm run lint
 TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x): Follow standard conventions
 
 ## Recent Changes
+- 007-fix-chart-indicators-history: Added TypeScript 5.8, React 18, Next.js 15 + Tailwind CSS, Recharts, TanStack Query, Framer Motion, react-hook-form, Zod
 - 006-refine-dashboard-history: Added TypeScript 5.8, React 18, Next.js 15 + Tailwind CSS, Recharts, TanStack Query, Framer Motion, react-hook-form, Zod
 - 005-refine-copy-scale-months: Added TypeScript 5.8, React 18, Next.js 15 + Tailwind CSS, Recharts, TanStack Query, Framer Motion, react-hook-form, Zod
-- 004-dashboard-banner-nav: Added TypeScript 5.x, React 18, Next.js 15.x + Tailwind CSS, TanStack Query, Recharts, Zod, next-themes, Framer Motion, react-hook-form, Radix/shadcn UI primitives ja adotados no repositorio
 
 
 <!-- MANUAL ADDITIONS START -->
