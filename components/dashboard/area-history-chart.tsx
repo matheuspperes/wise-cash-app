@@ -1,10 +1,13 @@
 "use client";
 
+import { formatMonthYearLabel } from "@/lib/formatting/ptbr";
+import { uiText } from "@/lib/i18n/ui-text";
 import { motion } from "framer-motion";
 import { memo } from "react";
 import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 type Point = {
+  monthRef?: string;
   month: string;
   income: number;
   expense: number;
@@ -39,7 +42,7 @@ function CustomTooltip({ active, label, payload }: { active?: boolean; label?: s
       initial={{ opacity: 0, y: 6 }}
       transition={{ duration: 0.16 }}
     >
-      <p className="mb-1 font-semibold text-foreground">{label}</p>
+      <p className="mb-1 font-semibold text-foreground">{label ? formatMonthYearLabel(label) : ""}</p>
       {hasDemoSeries ? <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted">Demo</p> : null}
       {payload.map((entry) => (
         <p key={entry.name} style={{ color: entry.color }}>
@@ -52,22 +55,26 @@ function CustomTooltip({ active, label, payload }: { active?: boolean; label?: s
 
 function AreaHistoryChartInner({ data, isFetching = false, demoMode = false }: Props) {
   if (!data.length) {
-    return <div className="rounded-xl border border-border bg-surface p-4 text-sm text-muted shadow-card">Sem dados historicos.</div>;
+    return <div className="rounded-2xl border border-border bg-surface p-5 text-base text-muted shadow-card">Sem dados históricos.</div>;
   }
 
   const hasDemoSeries = data.some((point) => (point.demoIncome ?? 0) > 0 || (point.demoExpense ?? 0) > 0);
+  const seriesMax = data.reduce((maxValue, point) => {
+    return Math.max(maxValue, point.income, point.expense, point.demoIncome ?? 0, point.demoExpense ?? 0);
+  }, 0);
+  const yAxisMax = seriesMax > 0 ? Math.ceil(seriesMax * 1.1) : 100;
 
   return (
-    <div className="h-72 rounded-xl border border-border bg-surface p-4 shadow-card">
-      <div className="mb-2 flex items-center justify-between">
-        <p className="text-sm text-muted">Historico mensal</p>
-        <div className="flex items-center gap-2">
+    <div className="h-80 rounded-2xl border border-border bg-surface p-5 shadow-card">
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-base text-muted">{uiText.chartHistorical}</p>
+        <div className="flex items-center gap-3">
           {demoMode && hasDemoSeries ? <span className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted">Demo</span> : null}
-          {isFetching ? <span className="text-xs text-muted">Sincronizando...</span> : null}
+          {isFetching ? <span className="text-sm text-muted">{uiText.syncStatus}</span> : null}
         </div>
       </div>
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ left: 0, right: 0, top: 8, bottom: 0 }}>
+        <AreaChart data={data} margin={{ left: 14, right: 18, top: 18, bottom: 14 }}>
           <defs>
             <linearGradient id="incomeGradient" x1="0" x2="0" y1="0" y2="1">
               <stop offset="5%" stopColor="#66ffc3" stopOpacity={0.7} />
@@ -79,10 +86,25 @@ function AreaHistoryChartInner({ data, isFetching = false, demoMode = false }: P
             </linearGradient>
           </defs>
           <CartesianGrid stroke="rgba(170, 182, 220, 0.15)" strokeDasharray="3 6" />
-          <XAxis axisLine={false} dataKey="month" tick={{ fill: "#9ca7c5", fontSize: 12 }} tickLine={false} />
-          <YAxis axisLine={false} tick={{ fill: "#9ca7c5", fontSize: 12 }} tickFormatter={(value) => `${Math.round(Number(value) / 1000)}k`} tickLine={false} />
+          <XAxis
+            axisLine={false}
+            dataKey="month"
+            padding={{ left: 8, right: 8 }}
+            tickMargin={10}
+            tick={{ fill: "#9ca7c5", fontSize: 14 }}
+            tickFormatter={(value) => formatMonthYearLabel(String(value))}
+            tickLine={false}
+          />
+          <YAxis
+            axisLine={false}
+            domain={[0, yAxisMax]}
+            tick={{ fill: "#9ca7c5", fontSize: 14 }}
+            tickCount={5}
+            tickFormatter={(value) => `${Math.round(Number(value) / 1000)}k`}
+            tickLine={false}
+          />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: "rgba(124, 140, 255, 0.4)" }} />
-          <Legend wrapperStyle={{ fontSize: 12 }} />
+          <Legend align="left" verticalAlign="top" wrapperStyle={{ fontSize: 14, paddingBottom: 16 }} />
           <Area animationDuration={420} animationEasing="ease-out" dataKey="income" fill="url(#incomeGradient)" name="Receitas" stroke="#66ffc3" strokeWidth={2} type="monotone" />
           <Area animationDuration={420} animationEasing="ease-out" dataKey="expense" fill="url(#expenseGradient)" name="Despesas" stroke="#ff9aac" strokeWidth={2} type="monotone" />
           {demoMode ? (

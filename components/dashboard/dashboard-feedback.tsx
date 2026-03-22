@@ -8,10 +8,10 @@ type ErrorProps = {
 
 export function DashboardError({ message, onRetry }: ErrorProps) {
   return (
-    <div className="rounded-xl border border-border bg-surface p-5 shadow-card">
-      <p className="text-sm text-danger">{message}</p>
-      <Button className="mt-3" onClick={onRetry} size="sm" variant="secondary">
-        Tentar novamente
+    <div className="rounded-2xl border border-border bg-surface p-6 shadow-card">
+      <p className="text-base text-danger">{message}</p>
+      <Button className="mt-4" onClick={onRetry} size="sm" variant="secondary">
+        {uiText.retry}
       </Button>
     </div>
   );
@@ -23,10 +23,8 @@ type EmptyProps = {
 
 export function DashboardEmpty({ demoMode = false }: EmptyProps) {
   return (
-    <div className="rounded-xl border border-border bg-surface p-5 text-sm text-muted shadow-card">
-      {demoMode
-        ? "Modo demonstracao ativo: dados demo e reais nao geraram historico para o periodo selecionado."
-        : uiText.emptyDashboard}
+    <div className="rounded-2xl border border-border bg-surface p-6 text-base text-muted shadow-card">
+      {demoMode ? uiText.demoModeEmpty : uiText.emptyDashboard}
     </div>
   );
 }

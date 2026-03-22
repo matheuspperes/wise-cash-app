@@ -18,6 +18,7 @@ const buttonVariants = cva(
         md: "h-10 px-4",
         lg: "h-11 px-5",
         icon: "h-11 w-11 p-0 rounded-full text-2xl",
+        ctaIcon: "h-10 w-10 p-0 rounded-full text-[1.4rem] leading-none",
       },
     },
     compoundVariants: [

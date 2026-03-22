@@ -54,13 +54,13 @@ export default function TransactionsPage() {
   );
 
   return (
-    <main className="mx-auto flex max-w-5xl flex-col gap-4 p-4">
-      <h1 className="text-2xl font-bold">Transacoes</h1>
+    <main className="mx-auto flex max-w-[76.8rem] flex-col gap-5 p-5">
+      <h1 className="text-[1.9rem] font-bold">Transações</h1>
       <TransactionForm onSaved={load} />
       <TransactionSearch value={q} onChange={setQ} />
       <TransactionFilters value={filters} onChange={setFilters} />
-      <section className="rounded-xl border border-border bg-surface p-4 shadow-card">
-        <h2 className="mb-3 text-lg font-semibold">Lancamentos</h2>
+      <section className="rounded-2xl border border-border bg-surface p-5 shadow-card">
+        <h2 className="mb-4 text-xl font-semibold">Lançamentos</h2>
         <ul className="divide-y">{renderedItems}</ul>
       </section>
     </main>

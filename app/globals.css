@@ -20,6 +20,11 @@
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.25rem;
+  --ui-scale-factor: 1.2;
+  --ui-readable-max: 76.8rem;
+  --space-1x: 1rem;
+  --space-1_2x: 1.2rem;
+  --space-2x: 2rem;
 
   --shadow-card: 0 10px 30px rgba(8, 10, 24, 0.24);
   --shadow-elevated: 0 18px 40px rgba(8, 10, 24, 0.36);

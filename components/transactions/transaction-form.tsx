@@ -8,11 +8,11 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const formSchema = z.object({
-  name: z.string().min(1, "Nome obrigatorio"),
+  name: z.string().min(1, "Nome obrigatório"),
   type: z.enum(["income", "expense"]),
-  categoryId: z.string().min(1, "Categoria obrigatoria"),
-  amount: z.string().min(1, "Valor obrigatorio"),
-  transactionDate: z.string().min(10, "Data obrigatoria"),
+  categoryId: z.string().min(1, "Categoria obrigatória"),
+  amount: z.string().min(1, "Valor obrigatório"),
+  transactionDate: z.string().min(10, "Data obrigatória"),
   observation: z.string().max(500).optional(),
 });
 
@@ -46,7 +46,7 @@ export function TransactionForm({ onSaved }: Props) {
   async function onSubmit(data: FormData) {
     const amount = Number(data.amount.replace(",", "."));
     if (!Number.isFinite(amount) || amount <= 0) {
-      setError("amount", { message: "Informe um valor numerico valido." });
+      setError("amount", { message: "Informe um valor numérico válido." });
       return;
     }
 
@@ -57,7 +57,7 @@ export function TransactionForm({ onSaved }: Props) {
     });
 
     if (!res.ok) {
-      setError("name", { message: "Nao foi possivel salvar a transacao." });
+      setError("name", { message: "Não foi possível salvar a transação." });
       return;
     }
 
@@ -66,9 +66,9 @@ export function TransactionForm({ onSaved }: Props) {
   }
 
   return (
-    <section className="rounded-xl border border-border bg-surface p-4 shadow-card">
-      <h2 className="mb-3 text-lg font-semibold">Nova transacao</h2>
-      <form className="grid gap-2 md:grid-cols-2" onSubmit={handleSubmit(onSubmit)}>
+    <section className="rounded-2xl border border-border bg-surface p-5 shadow-card">
+      <h2 className="mb-4 text-xl font-semibold">Nova transação</h2>
+      <form className="grid gap-3 md:grid-cols-2" onSubmit={handleSubmit(onSubmit)}>
         <div>
           <Input placeholder="Nome" {...register("name")} />
           {errors.name ? <p className="mt-1 text-xs text-danger">{errors.name.message}</p> : null}
