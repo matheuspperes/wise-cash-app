@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { uiText } from "@/lib/i18n/ui-text";
 
 type ErrorProps = {
   message: string;
@@ -16,10 +17,16 @@ export function DashboardError({ message, onRetry }: ErrorProps) {
   );
 }
 
-export function DashboardEmpty() {
+type EmptyProps = {
+  demoMode?: boolean;
+};
+
+export function DashboardEmpty({ demoMode = false }: EmptyProps) {
   return (
     <div className="rounded-xl border border-border bg-surface p-5 text-sm text-muted shadow-card">
-      Ainda nao existem dados reais para montar o dashboard.
+      {demoMode
+        ? "Modo demonstracao ativo: dados demo e reais nao geraram historico para o periodo selecionado."
+        : uiText.emptyDashboard}
     </div>
   );
 }

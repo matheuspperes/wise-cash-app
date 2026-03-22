@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
+import { uiText } from "@/lib/i18n/ui-text";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -12,7 +13,7 @@ const formSchema = z.object({
   categoryId: z.string().min(1, "Categoria obrigatoria"),
   amount: z.string().min(1, "Valor obrigatorio"),
   transactionDate: z.string().min(10, "Data obrigatoria"),
-  notes: z.string().max(500).optional(),
+  observation: z.string().max(500).optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -38,7 +39,7 @@ export function TransactionForm({ onSaved }: Props) {
       categoryId: "geral",
       amount: "",
       transactionDate: today,
-      notes: "",
+      observation: "",
     },
   });
 
@@ -52,7 +53,7 @@ export function TransactionForm({ onSaved }: Props) {
     const res = await fetch("/api/transactions", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ...data, amount }),
+      body: JSON.stringify({ ...data, notes: data.observation, amount }),
     });
 
     if (!res.ok) {
@@ -60,7 +61,7 @@ export function TransactionForm({ onSaved }: Props) {
       return;
     }
 
-    reset({ name: "", type: data.type, categoryId: data.categoryId, amount: "", transactionDate: data.transactionDate, notes: "" });
+    reset({ name: "", type: data.type, categoryId: data.categoryId, amount: "", transactionDate: data.transactionDate, observation: "" });
     onSaved?.();
   }
 
@@ -81,7 +82,7 @@ export function TransactionForm({ onSaved }: Props) {
         </div>
 
         <div>
-          <Input placeholder="Categoria" {...register("categoryId")} />
+          <Input placeholder={uiText.category} {...register("categoryId")} />
           {errors.categoryId ? <p className="mt-1 text-xs text-danger">{errors.categoryId.message}</p> : null}
         </div>
 
@@ -96,12 +97,12 @@ export function TransactionForm({ onSaved }: Props) {
         </div>
 
         <div>
-          <Input placeholder="Notas" {...register("notes")} />
-          {errors.notes ? <p className="mt-1 text-xs text-danger">{errors.notes.message}</p> : null}
+          <Input placeholder={uiText.observation} {...register("observation")} />
+          {errors.observation ? <p className="mt-1 text-xs text-danger">{errors.observation.message}</p> : null}
         </div>
 
-        <Button className="md:col-span-2" disabled={isSubmitting} type="submit">
-          {isSubmitting ? "Salvando..." : "Salvar"}
+        <Button className="md:col-span-2 md:max-w-40" disabled={isSubmitting} size="sm" type="submit">
+          {isSubmitting ? "Salvando..." : uiText.save}
         </Button>
       </form>
     </section>

@@ -1,0 +1,60 @@
+"use client";
+
+import { uiText } from "@/lib/i18n/ui-text";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+type Props = {
+  demoMode: boolean;
+  onToggleDemo: () => void;
+};
+
+const navItems = [
+  { label: uiText.dashboard, href: "/" },
+  { label: uiText.transactions, href: "/transactions" },
+];
+
+export function DashboardHeader({ demoMode, onToggleDemo }: Props) {
+  const pathname = usePathname();
+
+  return (
+    <header className="rounded-2xl border border-border bg-surface/80 px-4 py-3 shadow-card backdrop-blur">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.22em] text-muted">{uiText.brand}</p>
+          <h1 className="text-2xl font-bold">{uiText.dashboard}</h1>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <nav aria-label="Navegacao principal" className="flex items-center gap-1 rounded-xl border border-border bg-surface-alt/60 p-1">
+            {navItems.map((item) => (
+              <Link
+                className={cn(
+                  "rounded-lg px-3 py-1.5 text-sm transition",
+                  pathname === item.href ? "bg-surface text-foreground shadow-card" : "text-muted hover:text-foreground",
+                )}
+                href={item.href}
+                key={item.href}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <button
+            aria-label={demoMode ? "Desativar modo demonstracao" : "Ativar modo demonstracao"}
+            className={cn(
+              "rounded-lg border border-border px-3 py-1.5 text-xs font-semibold transition",
+              demoMode ? "bg-primary text-white" : "bg-surface-alt text-foreground hover:bg-surface",
+            )}
+            onClick={onToggleDemo}
+            type="button"
+          >
+            {demoMode ? "Demo ON" : "Demo OFF"}
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+}

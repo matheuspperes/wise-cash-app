@@ -7,6 +7,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-21
 - N/A (feature de padronizacao de ambiencia) (002-project-ambience-uv)
 - TypeScript 5.x, React 18, Next.js 15.x + Tailwind CSS, TanStack Query, Recharts, Zod, shadcn/ui, Radix UI, class-variance-authority, tailwind-merge, lucide-react, Framer Motion, react-hook-form, @hookform/resolvers, next-themes, Geist font via next/font (003-dark-theme-dashboard)
 - N/A (feature de UX/UI; dados continuam em APIs existentes) (003-dark-theme-dashboard)
+- TypeScript 5.x, React 18, Next.js 15.x + Tailwind CSS, TanStack Query, Recharts, Zod, next-themes, Framer Motion, react-hook-form, Radix/shadcn UI primitives ja adotados no repositorio (004-dashboard-banner-nav)
+- N/A para esta feature (camada visual, copy e simulacao de exibicao no dashboard) (004-dashboard-banner-nav)
 
 - TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x) + Next.js, Tailwind CSS, Shadcn/UI, TanStack Query, Supabase JS, Recharts (001-monthly-finance-manager)
 
@@ -27,10 +29,10 @@ npm test; npm run lint
 TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x): Follow standard conventions
 
 ## Recent Changes
+- 004-dashboard-banner-nav: Added TypeScript 5.x, React 18, Next.js 15.x + Tailwind CSS, TanStack Query, Recharts, Zod, next-themes, Framer Motion, react-hook-form, Radix/shadcn UI primitives ja adotados no repositorio
 - 003-dark-theme-dashboard: Added TypeScript 5.x, React 18, Next.js 15.x + Tailwind CSS, TanStack Query, Recharts, Zod, shadcn/ui, Radix UI, class-variance-authority, tailwind-merge, lucide-react, Framer Motion, react-hook-form, @hookform/resolvers, next-themes, Geist font via next/font
 - 002-project-ambience-uv: Added TypeScript 5.x, Node.js 20+ (stack atual), Python 3.11+ quando aplicavel + Next.js 15.x, React 18, npm (operacao atual), uv (padrao para Python)
 
-- 001-monthly-finance-manager: Added TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x) + Next.js, Tailwind CSS, Shadcn/UI, TanStack Query, Supabase JS, Recharts
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
