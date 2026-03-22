@@ -6,12 +6,16 @@ export type HistoricalTotalBalance = {
   netTotal: number;
 };
 
-export type CurrentMonthExpenseRow = {
+export type CurrentMonthTransactionRow = {
   date: string;
   description: string;
   category: string;
-  amount: number;
+  type: "income" | "expense";
+  value: number;
 };
+
+// Legacy alias retained for compatibility with existing component naming.
+export type CurrentMonthExpenseRow = CurrentMonthTransactionRow;
 
 export type MonthlyExpenseHistoryRow = {
   date: string;

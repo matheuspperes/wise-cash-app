@@ -10,7 +10,7 @@ import { NetBalanceCard } from "@/components/dashboard/net-balance-card";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/input";
 import { uiText } from "@/lib/i18n/ui-text";
-import { CurrentMonthExpenseRow, HistoricalTotalBalance, MonthlyExpenseHistoryGroup } from "@/lib/ui/dashboard-history-types";
+import { CurrentMonthTransactionRow, HistoricalTotalBalance, MonthlyExpenseHistoryGroup } from "@/lib/ui/dashboard-history-types";
 import { parseDemoMode, withDemoMode } from "@/lib/ui/demo-mode";
 import { getVisualDataState } from "@/lib/ui/data-state";
 import { useQuery } from "@tanstack/react-query";
@@ -23,7 +23,8 @@ type Summary = {
   netBalance: number;
   areaSeries: Array<{ month: string; income: number; expense: number; net: number; demoIncome?: number; demoExpense?: number }>;
   historicalBalance: HistoricalTotalBalance;
-  currentMonthExpenses: CurrentMonthExpenseRow[];
+  currentMonthTransactions: CurrentMonthTransactionRow[];
+  currentMonthExpenses?: CurrentMonthTransactionRow[];
   fullExpenseHistoryGroups?: MonthlyExpenseHistoryGroup[];
   totals?: { income: number; expense: number };
   demoMode?: boolean;
@@ -75,7 +76,7 @@ export function DashboardPageClient() {
         netBalance: 0,
         areaSeries: [],
         historicalBalance: { periodStart: "", periodEnd: "", totalIncome: 0, totalExpense: 0, netTotal: 0 },
-        currentMonthExpenses: [],
+        currentMonthTransactions: [],
         totals: { income: 0, expense: 0 },
       },
     [query.data],
@@ -127,14 +128,14 @@ export function DashboardPageClient() {
           initial={{ opacity: 0, y: 8 }}
           transition={{ duration: 0.22, ease: "easeOut" }}
         >
-          <div className="grid gap-4 md:grid-cols-[1fr_0.8fr]">
+          <div className="grid gap-4 md:grid-cols-[1fr_0.56fr]">
             <NetBalanceCard isFetching={query.isFetching} value={summary.netBalance} />
             <HistoricalTotalBalanceCard balance={summary.historicalBalance} isFetching={query.isFetching} />
           </div>
           <div className="-mt-1">
             <AreaHistoryChart data={summary.areaSeries} demoMode={demoMode} isFetching={query.isFetching} />
           </div>
-          <CurrentMonthExpensesTable isFetching={query.isFetching} rows={summary.currentMonthExpenses} />
+          <CurrentMonthExpensesTable isFetching={query.isFetching} rows={summary.currentMonthTransactions} />
         </motion.div>
       ) : null}
 

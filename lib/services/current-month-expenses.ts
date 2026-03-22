@@ -1,5 +1,6 @@
 import { listTransactions } from "@/lib/repositories/transaction-repository";
-import { CurrentMonthExpenseRow } from "@/lib/ui/dashboard-history-types";
+import { mapTransactionToCurrentMonthRow } from "@/lib/services/dashboard-history-mapper";
+import { CurrentMonthTransactionRow } from "@/lib/ui/dashboard-history-types";
 
 function monthKeyFromDate(date: Date): string {
   const year = date.getFullYear();
@@ -7,16 +8,14 @@ function monthKeyFromDate(date: Date): string {
   return `${year}-${month}`;
 }
 
-export function listCurrentMonthExpenseRows(referenceDate: Date = new Date()): CurrentMonthExpenseRow[] {
+export function listCurrentMonthTransactionRows(referenceDate: Date = new Date()): CurrentMonthTransactionRow[] {
   const currentMonth = monthKeyFromDate(referenceDate);
 
-  return listTransactions({ type: "expense" })
+  return listTransactions()
     .filter((tx) => tx.transactionDate.startsWith(currentMonth))
     .sort((a, b) => (a.transactionDate < b.transactionDate ? 1 : -1))
-    .map((tx) => ({
-      date: tx.transactionDate,
-      description: tx.name,
-      category: tx.categoryName,
-      amount: tx.amount,
-    }));
+    .map(mapTransactionToCurrentMonthRow);
 }
+
+// Legacy alias retained for compatibility with existing imports.
+export const listCurrentMonthExpenseRows = listCurrentMonthTransactionRows;

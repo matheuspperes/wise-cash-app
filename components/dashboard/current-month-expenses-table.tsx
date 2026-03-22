@@ -1,13 +1,16 @@
 import { formatCurrencyBRL, formatDateBR } from "@/lib/formatting/ptbr";
 import { uiText } from "@/lib/i18n/ui-text";
-import { CurrentMonthExpenseRow } from "@/lib/ui/dashboard-history-types";
+import { CurrentMonthTransactionRow } from "@/lib/ui/dashboard-history-types";
+import { cn } from "@/lib/utils";
 
 type Props = {
-  rows: CurrentMonthExpenseRow[];
+  rows: CurrentMonthTransactionRow[];
   isFetching?: boolean;
 };
 
 export function CurrentMonthExpensesTable({ rows, isFetching = false }: Props) {
+  const sortedRows = [...rows].sort((a, b) => (a.date < b.date ? 1 : -1));
+
   return (
     <section className="rounded-2xl border border-border bg-surface p-5 shadow-card">
       <div className="mb-4 flex items-center justify-between">
@@ -15,7 +18,7 @@ export function CurrentMonthExpensesTable({ rows, isFetching = false }: Props) {
         {isFetching ? <span className="text-sm text-muted">{uiText.syncStatus}</span> : null}
       </div>
 
-      {!rows.length ? (
+      {!sortedRows.length ? (
         <p className="text-sm text-muted">{uiText.currentMonthExpensesEmpty}</p>
       ) : (
         <div className="overflow-x-auto">
@@ -25,16 +28,21 @@ export function CurrentMonthExpensesTable({ rows, isFetching = false }: Props) {
                 <th className="py-2 pr-4 font-medium">{uiText.columnDate}</th>
                 <th className="py-2 pr-4 font-medium">{uiText.columnDescription}</th>
                 <th className="py-2 pr-4 font-medium">{uiText.columnCategory}</th>
+                <th className="py-2 pr-4 font-medium">{uiText.columnType}</th>
                 <th className="py-2 text-right font-medium">{uiText.columnValue}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/70 text-sm">
-              {rows.map((row, index) => (
+              {sortedRows.map((row, index) => (
                 <tr key={`${row.date}-${row.description}-${index}`}>
                   <td className="whitespace-nowrap py-2 pr-4">{formatDateBR(row.date)}</td>
                   <td className="py-2 pr-4">{row.description}</td>
                   <td className="py-2 pr-4">{row.category}</td>
-                  <td className="whitespace-nowrap py-2 text-right font-semibold text-danger">-{formatCurrencyBRL(row.amount)}</td>
+                  <td className="py-2 pr-4">{row.type === "income" ? uiText.typeIncome : uiText.typeExpense}</td>
+                  <td className={cn("whitespace-nowrap py-2 text-right font-semibold", row.type === "income" ? "text-emerald-400" : "text-danger")}>
+                    {row.type === "income" ? "+" : "-"}
+                    {formatCurrencyBRL(row.value)}
+                  </td>
                 </tr>
               ))}
             </tbody>

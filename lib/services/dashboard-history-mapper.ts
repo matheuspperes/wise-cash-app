@@ -1,6 +1,7 @@
 import { MonthlyPoint } from "@/lib/repositories/monthly-summary-repository";
 import { groupMonthlyExpenseHistory } from "@/lib/services/monthly-expense-history";
-import { HistoricalTotalBalance, MonthlyExpenseHistoryGroup, MonthlyExpenseHistoryRow } from "@/lib/ui/dashboard-history-types";
+import { Transaction } from "@/lib/repositories/in-memory-db";
+import { CurrentMonthTransactionRow, HistoricalTotalBalance, MonthlyExpenseHistoryGroup, MonthlyExpenseHistoryRow } from "@/lib/ui/dashboard-history-types";
 
 export function buildHistoricalTotalBalance(series: MonthlyPoint[]): HistoricalTotalBalance {
   if (!series.length) {
@@ -27,4 +28,14 @@ export function buildHistoricalTotalBalance(series: MonthlyPoint[]): HistoricalT
 
 export function buildMonthlyExpenseHistoryGroups(rows: MonthlyExpenseHistoryRow[]): MonthlyExpenseHistoryGroup[] {
   return groupMonthlyExpenseHistory(rows);
+}
+
+export function mapTransactionToCurrentMonthRow(tx: Transaction): CurrentMonthTransactionRow {
+  return {
+    date: tx.transactionDate,
+    description: tx.name,
+    category: tx.categoryName,
+    type: tx.type,
+    value: tx.amount,
+  };
 }

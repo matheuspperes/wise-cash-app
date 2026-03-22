@@ -5,7 +5,7 @@ import { uiText } from "@/lib/i18n/ui-text";
 import { buildDynamicChartAxisProfile, formatAxisTickLabel } from "@/lib/services/chart-axis-profile";
 import { motion } from "framer-motion";
 import { memo } from "react";
-import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 type Point = {
   monthRef?: string;
@@ -65,16 +65,41 @@ function AreaHistoryChartInner({ data, isFetching = false, demoMode = false }: P
   );
 
   return (
-    <div className="h-80 rounded-2xl border border-border bg-surface p-5 shadow-card">
-      <div className="mb-2 flex items-center justify-between">
+    <div className="flex h-80 flex-col rounded-2xl border border-border bg-surface p-5 shadow-card">
+      <div className="mb-2 flex items-center justify-between gap-3">
         <p className="text-base text-muted">{uiText.chartHistorical}</p>
         <div className="flex items-center gap-3">
           {demoMode && hasDemoSeries ? <span className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted">Demo</span> : null}
           {isFetching ? <span className="text-sm text-muted">{uiText.syncStatus}</span> : null}
         </div>
       </div>
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ left: 14, right: 18, top: 10, bottom: 22 }}>
+      <div className="mb-2 flex justify-end">
+        <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-sm text-muted">
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden className="h-2 w-2 rounded-full bg-[#66ffc3]" />
+            Receitas
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden className="h-2 w-2 rounded-full bg-[#ff9aac]" />
+            Despesas
+          </span>
+          {demoMode ? (
+            <>
+              <span className="inline-flex items-center gap-1.5">
+                <span aria-hidden className="h-2 w-2 rounded-full bg-[#7e8bff]" />
+                Receitas (Demo)
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span aria-hidden className="h-2 w-2 rounded-full bg-[#b06cff]" />
+                Despesas (Demo)
+              </span>
+            </>
+          ) : null}
+        </div>
+      </div>
+      <div className="min-h-0 flex-1">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={data} margin={{ left: 14, right: 18, top: 4, bottom: 22 }}>
           <defs>
             <linearGradient id="incomeGradient" x1="0" x2="0" y1="0" y2="1">
               <stop offset="5%" stopColor="#66ffc3" stopOpacity={0.7} />
@@ -104,38 +129,38 @@ function AreaHistoryChartInner({ data, isFetching = false, demoMode = false }: P
             tickFormatter={(value) => formatAxisTickLabel(Number(value))}
             tickLine={false}
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ stroke: "rgba(124, 140, 255, 0.4)" }} />
-          <Legend align="left" verticalAlign="top" wrapperStyle={{ fontSize: 14, paddingBottom: 8 }} />
-          <Area animationDuration={420} animationEasing="ease-out" dataKey="income" fill="url(#incomeGradient)" name="Receitas" stroke="#66ffc3" strokeWidth={2} type="monotone" />
-          <Area animationDuration={420} animationEasing="ease-out" dataKey="expense" fill="url(#expenseGradient)" name="Despesas" stroke="#ff9aac" strokeWidth={2} type="monotone" />
-          {demoMode ? (
-            <Area
-              animationDuration={420}
-              animationEasing="ease-out"
-              dataKey="demoIncome"
-              fillOpacity={0}
-              name="Receitas (Demo)"
-              stroke="#7e8bff"
-              strokeDasharray="5 4"
-              strokeWidth={2}
-              type="monotone"
-            />
-          ) : null}
-          {demoMode ? (
-            <Area
-              animationDuration={420}
-              animationEasing="ease-out"
-              dataKey="demoExpense"
-              fillOpacity={0}
-              name="Despesas (Demo)"
-              stroke="#b06cff"
-              strokeDasharray="5 4"
-              strokeWidth={2}
-              type="monotone"
-            />
-          ) : null}
-        </AreaChart>
-      </ResponsiveContainer>
+            <Tooltip content={<CustomTooltip />} cursor={{ stroke: "rgba(124, 140, 255, 0.4)" }} />
+            <Area animationDuration={420} animationEasing="ease-out" dataKey="income" fill="url(#incomeGradient)" name="Receitas" stroke="#66ffc3" strokeWidth={2} type="monotone" />
+            <Area animationDuration={420} animationEasing="ease-out" dataKey="expense" fill="url(#expenseGradient)" name="Despesas" stroke="#ff9aac" strokeWidth={2} type="monotone" />
+            {demoMode ? (
+              <Area
+                animationDuration={420}
+                animationEasing="ease-out"
+                dataKey="demoIncome"
+                fillOpacity={0}
+                name="Receitas (Demo)"
+                stroke="#7e8bff"
+                strokeDasharray="5 4"
+                strokeWidth={2}
+                type="monotone"
+              />
+            ) : null}
+            {demoMode ? (
+              <Area
+                animationDuration={420}
+                animationEasing="ease-out"
+                dataKey="demoExpense"
+                fillOpacity={0}
+                name="Despesas (Demo)"
+                stroke="#b06cff"
+                strokeDasharray="5 4"
+                strokeWidth={2}
+                type="monotone"
+              />
+            ) : null}
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }

@@ -1,8 +1,9 @@
 import { listDemoTransactions } from "@/lib/repositories/demo-chart-data";
 import { listTransactions } from "@/lib/repositories/transaction-repository";
 import { mergeRealAndDemoSeries } from "@/lib/services/chart-demo-series";
+import { listCurrentMonthTransactionRows } from "@/lib/services/current-month-expenses";
 import { formatMonthYearLabel } from "@/lib/formatting/ptbr";
-import { MonthlyExpenseHistoryRow } from "@/lib/ui/dashboard-history-types";
+import { CurrentMonthTransactionRow, MonthlyExpenseHistoryRow } from "@/lib/ui/dashboard-history-types";
 
 export type MonthlyPoint = {
   monthRef: string;
@@ -74,4 +75,8 @@ export function listFullExpenseHistoryRows(): MonthlyExpenseHistoryRow[] {
       category: tx.categoryName,
       amount: tx.amount,
     }));
+}
+
+export function listCurrentMonthTransactions(referenceDate: Date = new Date()): CurrentMonthTransactionRow[] {
+  return listCurrentMonthTransactionRows(referenceDate);
 }

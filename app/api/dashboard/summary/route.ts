@@ -1,5 +1,4 @@
-import { getMonthlySummaryContext, listFullExpenseHistoryRows } from "@/lib/repositories/monthly-summary-repository";
-import { listCurrentMonthExpenseRows } from "@/lib/services/current-month-expenses";
+import { getMonthlySummaryContext, listCurrentMonthTransactions, listFullExpenseHistoryRows } from "@/lib/repositories/monthly-summary-repository";
 import { buildHistoricalTotalBalance, buildMonthlyExpenseHistoryGroups } from "@/lib/services/dashboard-history-mapper";
 import { parseDemoMode } from "@/lib/ui/demo-mode";
 import { NextRequest, NextResponse } from "next/server";
@@ -12,7 +11,7 @@ export async function GET(req: NextRequest) {
   const areaSeries = summaryContext.series;
   const latest = summaryContext.latest;
   const historicalBalance = buildHistoricalTotalBalance(areaSeries);
-  const currentMonthExpenses = listCurrentMonthExpenseRows();
+  const currentMonthTransactions = listCurrentMonthTransactions();
   const fullExpenseHistoryRows = listFullExpenseHistoryRows();
   const fullExpenseHistoryGroups = buildMonthlyExpenseHistoryGroups(fullExpenseHistoryRows);
 
@@ -21,7 +20,9 @@ export async function GET(req: NextRequest) {
     netBalance: latest.net,
     totals: { income: latest.income, expense: latest.expense },
     historicalBalance,
-    currentMonthExpenses,
+    currentMonthTransactions,
+    // Legacy payload retained temporarily for compatibility.
+    currentMonthExpenses: currentMonthTransactions,
     fullExpenseHistoryGroups,
     demoMode,
     hasDemoSeries: areaSeries.some((point) => (point.demoIncome ?? 0) > 0 || (point.demoExpense ?? 0) > 0),
