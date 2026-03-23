@@ -15,6 +15,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-23
 - N/A (sem mudanca de persistencia; dados continuam em repositorio em memoria/API existente) (007-fix-chart-indicators-history)
 - TypeScript 5.8, React 18, Next.js 15 App Router + TanStack Query, Recharts, Framer Motion, React Hook Form, Zod (009-remove-demo-transactions-flow)
 - In-memory store (`lib/repositories/in-memory-db.ts`) and repository/service layer wrappers (009-remove-demo-transactions-flow)
+- TypeScript 5.8, React 18, Next.js 15 App Router + TanStack Query, React Hook Form, Zod, existing UI primitives (`components/ui`) (010-refine-transactions-history-entry)
+- Existing in-memory repository flow (`lib/repositories/in-memory-db.ts`), plus transient in-page state for temporary launches table (010-refine-transactions-history-entry)
 
 - TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x) + Next.js, Tailwind CSS, Shadcn/UI, TanStack Query, Supabase JS, Recharts (001-monthly-finance-manager)
 
@@ -35,9 +37,9 @@ npm test; npm run lint
 TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x): Follow standard conventions
 
 ## Recent Changes
+- 010-refine-transactions-history-entry: Added TypeScript 5.8, React 18, Next.js 15 App Router + TanStack Query, React Hook Form, Zod, existing UI primitives (`components/ui`)
 - 009-remove-demo-transactions-flow: Added TypeScript 5.8, React 18, Next.js 15 App Router + TanStack Query, Recharts, Framer Motion, React Hook Form, Zod
 - 008-refine-legend-history-layout: Added TypeScript 5.8, React 18, Next.js 15 + Tailwind CSS, Recharts, TanStack Query, Framer Motion, react-hook-form, Zod
-- 007-fix-chart-indicators-history: Added TypeScript 5.8, React 18, Next.js 15 + Tailwind CSS, Recharts, TanStack Query, Framer Motion, react-hook-form, Zod
 
 
 <!-- MANUAL ADDITIONS START -->
