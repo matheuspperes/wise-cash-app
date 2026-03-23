@@ -1,6 +1,4 @@
-import { listDemoTransactions } from "@/lib/repositories/demo-chart-data";
 import { listTransactions } from "@/lib/repositories/transaction-repository";
-import { mergeRealAndDemoSeries } from "@/lib/services/chart-demo-series";
 import { listCurrentMonthTransactionRows } from "@/lib/services/current-month-expenses";
 import { formatMonthYearLabel } from "@/lib/formatting/ptbr";
 import { CurrentMonthTransactionRow, MonthlyExpenseHistoryRow } from "@/lib/ui/dashboard-history-types";
@@ -11,12 +9,6 @@ export type MonthlyPoint = {
   income: number;
   expense: number;
   net: number;
-  demoIncome?: number;
-  demoExpense?: number;
-};
-
-type SummaryOptions = {
-  demoMode?: boolean;
 };
 
 export type MonthlySummaryContext = {
@@ -24,7 +16,7 @@ export type MonthlySummaryContext = {
   latest: MonthlyPoint;
 };
 
-export function getMonthlySummary(months = 12, options: SummaryOptions = {}) {
+export function getMonthlySummary(months = 12) {
   const txs = listTransactions();
   const bucket = new Map<string, MonthlyPoint>();
 
@@ -47,17 +39,11 @@ export function getMonthlySummary(months = 12, options: SummaryOptions = {}) {
     .sort((a, b) => (a.monthRef > b.monthRef ? 1 : -1))
     .slice(-months);
 
-  if (!options.demoMode) {
-    return realSeries.map((point) => ({ ...point, month: formatMonthYearLabel(point.monthRef) }));
-  }
-
-  return mergeRealAndDemoSeries(realSeries, listDemoTransactions())
-    .slice(-months)
-    .map((point) => ({ ...point, month: formatMonthYearLabel(point.monthRef) }));
+  return realSeries.map((point) => ({ ...point, month: formatMonthYearLabel(point.monthRef) }));
 }
 
-export function getMonthlySummaryContext(months = 12, options: SummaryOptions = {}): MonthlySummaryContext {
-  const series = getMonthlySummary(months, options);
+export function getMonthlySummaryContext(months = 12): MonthlySummaryContext {
+  const series = getMonthlySummary(months);
   const latest = series[series.length - 1] ?? { monthRef: "", month: "", income: 0, expense: 0, net: 0 };
 
   return {

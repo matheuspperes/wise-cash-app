@@ -4,10 +4,8 @@ export const uiText = {
   transactions: "Transações",
   category: "Categoria",
   observation: "Observação",
-  records: "Lançamentos",
   netBalance: "Saldo líquido atual",
   save: "Salvar",
-  chartDemoLegend: "Demo",
   chartHistorical: "Histórico mensal",
   historicalNetBalance: "Saldo líquido histórico",
   currentMonthExpensesTitle: "Transações do mês atual",
@@ -23,5 +21,4 @@ export const uiText = {
   loadingError: "Não foi possível carregar os dados do dashboard.",
   emptyDashboard: "Ainda não existem dados reais para montar o dashboard.",
   retry: "Tentar novamente",
-  demoModeEmpty: "Modo demonstração ativo: dados demo e reais não geraram histórico para o período selecionado.",
 } as const;

@@ -17,14 +17,10 @@ export function DashboardError({ message, onRetry }: ErrorProps) {
   );
 }
 
-type EmptyProps = {
-  demoMode?: boolean;
-};
-
-export function DashboardEmpty({ demoMode = false }: EmptyProps) {
+export function DashboardEmpty() {
   return (
     <div className="rounded-2xl border border-border bg-surface p-6 text-base text-muted shadow-card">
-      {demoMode ? uiText.demoModeEmpty : uiText.emptyDashboard}
+      {uiText.emptyDashboard}
     </div>
   );
 }

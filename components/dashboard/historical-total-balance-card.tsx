@@ -12,8 +12,8 @@ export function HistoricalTotalBalanceCard({ balance, isFetching = false }: Prop
   const positive = balance.netTotal >= 0;
 
   return (
-    <article className="w-full rounded-2xl border border-border bg-surface p-4 shadow-card md:justify-self-end">
-      <div className="mb-2 flex items-center justify-between">
+    <article className="w-full rounded-2xl border border-border bg-surface p-4 text-right shadow-card md:justify-self-end">
+      <div className="mb-2 flex items-center justify-end gap-3">
         <p className="text-sm text-muted">{uiText.historicalNetBalance}</p>
         {isFetching ? <span className="text-xs text-muted">{uiText.syncStatus}</span> : null}
       </div>

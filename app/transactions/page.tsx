@@ -6,6 +6,9 @@ import { MonthlyExpenseHistoryAccordion } from "@/components/transactions/monthl
 import { TransactionSearch } from "@/components/transactions/transaction-search";
 import { formatCurrencyBRL, formatDateBR } from "@/lib/formatting/ptbr";
 import { MonthlyExpenseHistoryGroup } from "@/lib/ui/dashboard-history-types";
+import { parseTransactionsView } from "@/lib/ui/transactions-view";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 type Tx = {
@@ -18,6 +21,11 @@ type Tx = {
 };
 
 export default function TransactionsPage() {
+  const searchParams = useSearchParams();
+  const view = parseTransactionsView(searchParams.get("view"));
+  const showHistory = view === "history";
+  const showNew = view === "new";
+
   const [items, setItems] = useState<Tx[]>([]);
   const [monthlyExpenseGroups, setMonthlyExpenseGroups] = useState<MonthlyExpenseHistoryGroup[]>([]);
   const [isLoadingMonthlyHistory, setIsLoadingMonthlyHistory] = useState(false);
@@ -75,18 +83,33 @@ export default function TransactionsPage() {
   return (
     <main className="mx-auto flex max-w-[76.8rem] flex-col gap-5 p-5">
       <h1 className="text-[1.9rem] font-bold">Transações</h1>
-      <TransactionForm
-        onSaved={async () => {
-          await Promise.all([load(), loadMonthlyHistory()]);
-        }}
-      />
-      <TransactionSearch value={q} onChange={setQ} />
-      <TransactionFilters value={filters} onChange={setFilters} />
-      <section className="rounded-2xl border border-border bg-surface p-5 shadow-card">
-        <h2 className="mb-4 text-xl font-semibold">Lançamentos</h2>
-        <ul className="divide-y">{renderedItems}</ul>
-      </section>
-      <MonthlyExpenseHistoryAccordion groups={monthlyExpenseGroups} isLoading={isLoadingMonthlyHistory} />
+
+      {showNew ? (
+        <>
+          <TransactionForm
+            onSaved={async () => {
+              await Promise.all([load(), loadMonthlyHistory()]);
+            }}
+          />
+          <div className="-mt-1 text-right text-sm text-muted">
+            <Link className="underline hover:text-foreground" href="/transactions?view=history">
+              Ver histórico de transações
+            </Link>
+          </div>
+        </>
+      ) : null}
+
+      {showHistory ? (
+        <>
+          <TransactionSearch value={q} onChange={setQ} />
+          <TransactionFilters value={filters} onChange={setFilters} />
+          <section className="rounded-2xl border border-border bg-surface p-5 shadow-card">
+            <h2 className="mb-4 text-xl font-semibold">Histórico de transações</h2>
+            <ul className="divide-y">{renderedItems}</ul>
+          </section>
+          <MonthlyExpenseHistoryAccordion groups={monthlyExpenseGroups} isLoading={isLoadingMonthlyHistory} />
+        </>
+      ) : null}
     </main>
   );
 }
