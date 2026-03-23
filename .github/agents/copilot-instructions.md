@@ -1,6 +1,6 @@
 ﻿# wise-cash-app Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-22
+Auto-generated from all feature plans. Last updated: 2026-03-23
 
 ## Active Technologies
 - TypeScript 5.x, Node.js 20+ (stack atual), Python 3.11+ quando aplicavel + Next.js 15.x, React 18, npm (operacao atual), uv (padrao para Python) (002-project-ambience-uv)
@@ -13,6 +13,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-22
 - N/A (sem mudanca de persistencia; dados continuam via APIs existentes) (005-refine-copy-scale-months)
 - N/A (sem mudanca de persistencia; dados continuam em APIs/repositorios existentes) (006-refine-dashboard-history)
 - N/A (sem mudanca de persistencia; dados continuam em repositorio em memoria/API existente) (007-fix-chart-indicators-history)
+- TypeScript 5.8, React 18, Next.js 15 App Router + TanStack Query, Recharts, Framer Motion, React Hook Form, Zod (009-remove-demo-transactions-flow)
+- In-memory store (`lib/repositories/in-memory-db.ts`) and repository/service layer wrappers (009-remove-demo-transactions-flow)
 
 - TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x) + Next.js, Tailwind CSS, Shadcn/UI, TanStack Query, Supabase JS, Recharts (001-monthly-finance-manager)
 
@@ -33,9 +35,9 @@ npm test; npm run lint
 TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x): Follow standard conventions
 
 ## Recent Changes
+- 009-remove-demo-transactions-flow: Added TypeScript 5.8, React 18, Next.js 15 App Router + TanStack Query, Recharts, Framer Motion, React Hook Form, Zod
 - 008-refine-legend-history-layout: Added TypeScript 5.8, React 18, Next.js 15 + Tailwind CSS, Recharts, TanStack Query, Framer Motion, react-hook-form, Zod
 - 007-fix-chart-indicators-history: Added TypeScript 5.8, React 18, Next.js 15 + Tailwind CSS, Recharts, TanStack Query, Framer Motion, react-hook-form, Zod
-- 006-refine-dashboard-history: Added TypeScript 5.8, React 18, Next.js 15 + Tailwind CSS, Recharts, TanStack Query, Framer Motion, react-hook-form, Zod
 
 
 <!-- MANUAL ADDITIONS START -->
