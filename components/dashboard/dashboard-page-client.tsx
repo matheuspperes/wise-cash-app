@@ -68,26 +68,20 @@ export function DashboardPageClient() {
 
   return (
     <main className="mx-auto flex max-w-[76.8rem] flex-col gap-5 px-5 pb-28 pt-5 md:pb-5">
-      <DashboardHeader />
-
-      <div className="flex items-center justify-end gap-3 md:hidden">
-        <Select className="w-40" value={months} onChange={(e) => setMonths(Number(e.target.value))}>
-          <option value={3}>3 meses</option>
-          <option value={6}>6 meses</option>
-          <option value={12}>12 meses</option>
-        </Select>
-      </div>
-
-      <div className="hidden items-center justify-end gap-4 md:flex">
-        <Select className="w-40" value={months} onChange={(e) => setMonths(Number(e.target.value))}>
-          <option value={3}>3 meses</option>
-          <option value={6}>6 meses</option>
-          <option value={12}>12 meses</option>
-        </Select>
-        <Button asChild className="h-10 w-10 rounded-full bg-[var(--primary-cta)] p-0 text-[1.4rem] leading-none text-white shadow-elevated hover:brightness-110" size="ctaIcon">
-          <Link aria-label="Nova transação" href={transactionsCreateHref}>+</Link>
-        </Button>
-      </div>
+      <DashboardHeader
+        controls={(
+          <div className="flex w-full items-center justify-end gap-3 md:w-auto md:gap-4">
+            <Select className="w-40" value={months} onChange={(e) => setMonths(Number(e.target.value))}>
+              <option value={3}>3 meses</option>
+              <option value={6}>6 meses</option>
+              <option value={12}>12 meses</option>
+            </Select>
+            <Button asChild className="h-10 w-10 rounded-full bg-[var(--primary-cta)] p-0 text-[1.4rem] leading-none text-white shadow-elevated hover:brightness-110" size="ctaIcon">
+              <Link aria-label="Nova transação" href={transactionsCreateHref}>+</Link>
+            </Button>
+          </div>
+        )}
+      />
 
       {visualState === "loading" ? <DashboardLoading /> : null}
       {visualState === "error" ? <DashboardError message={uiText.loadingError} onRetry={() => query.refetch()} /> : null}
@@ -100,7 +94,7 @@ export function DashboardPageClient() {
           initial={{ opacity: 0, y: 8 }}
           transition={{ duration: 0.22, ease: "easeOut" }}
         >
-          <div className="grid gap-4 md:grid-cols-[1fr_0.56fr]">
+          <div className="grid items-stretch gap-4 md:grid-cols-[1fr_0.56fr]">
             <NetBalanceCard isFetching={query.isFetching} value={summary.netBalance} />
             <HistoricalTotalBalanceCard balance={summary.historicalBalance} isFetching={query.isFetching} />
           </div>
@@ -110,10 +104,6 @@ export function DashboardPageClient() {
           <CurrentMonthExpensesTable isFetching={query.isFetching} rows={summary.currentMonthTransactions} />
         </motion.div>
       ) : null}
-
-      <Button asChild className="fixed bottom-6 right-6 z-20 h-[3.125rem] w-[3.125rem] rounded-full bg-[var(--primary-cta)] p-0 text-[2rem] leading-none text-white shadow-elevated md:hidden" size="ctaIcon">
-        <Link aria-label="Nova transação" href={transactionsCreateHref}>+</Link>
-      </Button>
     </main>
   );
 }
