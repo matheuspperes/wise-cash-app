@@ -225,3 +225,4 @@ Task: "T026 [US4] Standardize equal horizontal and vertical padding for dashboar
 - All user stories include manual validation tasks by constitution.
 - Automated test tasks are intentionally excluded.
 - Task descriptions include explicit file paths for direct execution.
+- Post-implementation hotfix validated on 2026-03-23 for create-new category submission flow in transaction form.
