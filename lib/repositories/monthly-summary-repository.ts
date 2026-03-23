@@ -1,7 +1,7 @@
 import { listTransactions } from "@/lib/repositories/transaction-repository";
 import { listCurrentMonthTransactionRows } from "@/lib/services/current-month-expenses";
 import { formatMonthYearLabel } from "@/lib/formatting/ptbr";
-import { CurrentMonthTransactionRow, MonthlyExpenseHistoryRow } from "@/lib/ui/dashboard-history-types";
+import { CurrentMonthTransactionRow, MonthlyExpenseHistoryRow, MonthlyTransactionHistoryRow } from "@/lib/ui/dashboard-history-types";
 
 export type MonthlyPoint = {
   monthRef: string;
@@ -52,15 +52,21 @@ export function getMonthlySummaryContext(months = 12): MonthlySummaryContext {
   };
 }
 
-export function listFullExpenseHistoryRows(): MonthlyExpenseHistoryRow[] {
-  return listTransactions({ type: "expense" })
+export function listFullTransactionsHistoryRows(): MonthlyTransactionHistoryRow[] {
+  return listTransactions()
     .sort((a, b) => (a.transactionDate < b.transactionDate ? 1 : -1))
     .map((tx) => ({
       date: tx.transactionDate,
       description: tx.name,
       category: tx.categoryName,
+      type: tx.type,
       amount: tx.amount,
     }));
+}
+
+// Legacy alias retained for compatibility with existing references.
+export function listFullExpenseHistoryRows(): MonthlyExpenseHistoryRow[] {
+  return listFullTransactionsHistoryRows();
 }
 
 export function listCurrentMonthTransactions(referenceDate: Date = new Date()): CurrentMonthTransactionRow[] {

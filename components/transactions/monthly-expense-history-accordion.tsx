@@ -1,6 +1,7 @@
 "use client";
 
 import { formatCurrencyBRL, formatDateBR } from "@/lib/formatting/ptbr";
+import { uiText } from "@/lib/i18n/ui-text";
 import { MonthlyExpenseHistoryGroup } from "@/lib/ui/dashboard-history-types";
 
 type Props = {
@@ -12,12 +13,12 @@ export function MonthlyExpenseHistoryAccordion({ groups, isLoading = false }: Pr
   return (
     <section className="rounded-2xl border border-border bg-surface p-5 shadow-card">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Histórico completo de gastos</h2>
+        <h2 className="text-xl font-semibold">{uiText.fullHistoryTitle}</h2>
         {isLoading ? <span className="text-sm text-muted">Sincronizando...</span> : null}
       </div>
 
       {!groups.length ? (
-        <p className="text-sm text-muted">Nenhum gasto registrado no histórico.</p>
+        <p className="text-sm text-muted">{uiText.fullHistoryEmpty}</p>
       ) : (
         <div className="space-y-3">
           {groups.map((group) => (
@@ -36,6 +37,7 @@ export function MonthlyExpenseHistoryAccordion({ groups, isLoading = false }: Pr
                       <th className="py-2 pr-4 font-medium">Data</th>
                       <th className="py-2 pr-4 font-medium">Descrição</th>
                       <th className="py-2 pr-4 font-medium">Categoria</th>
+                      <th className="py-2 pr-4 font-medium">Tipo</th>
                       <th className="py-2 text-right font-medium">Valor</th>
                     </tr>
                   </thead>
@@ -45,7 +47,10 @@ export function MonthlyExpenseHistoryAccordion({ groups, isLoading = false }: Pr
                         <td className="whitespace-nowrap py-2 pr-4">{formatDateBR(row.date)}</td>
                         <td className="py-2 pr-4">{row.description}</td>
                         <td className="py-2 pr-4">{row.category}</td>
-                        <td className="whitespace-nowrap py-2 text-right font-semibold text-danger">-{formatCurrencyBRL(row.amount)}</td>
+                        <td className="whitespace-nowrap py-2 pr-4">{row.type === "income" ? "Ganho" : "Gasto"}</td>
+                        <td className={row.type === "income" ? "whitespace-nowrap py-2 text-right font-semibold text-emerald-400" : "whitespace-nowrap py-2 text-right font-semibold text-danger"}>
+                          {row.type === "income" ? "+" : "-"}{formatCurrencyBRL(row.amount)}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

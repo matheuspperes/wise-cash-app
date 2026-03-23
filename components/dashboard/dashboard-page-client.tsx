@@ -24,6 +24,7 @@ type Summary = {
   historicalBalance: HistoricalTotalBalance;
   currentMonthTransactions: CurrentMonthTransactionRow[];
   currentMonthExpenses?: CurrentMonthTransactionRow[];
+  fullTransactionsHistoryGroups?: MonthlyExpenseHistoryGroup[];
   fullExpenseHistoryGroups?: MonthlyExpenseHistoryGroup[];
   totals?: { income: number; expense: number };
 };

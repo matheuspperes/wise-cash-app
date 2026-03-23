@@ -1,13 +1,13 @@
 import { formatMonthRefLabel, toMonthRef } from "@/lib/formatting/ptbr";
-import { MonthlyExpenseHistoryGroup, MonthlyExpenseHistoryRow } from "@/lib/ui/dashboard-history-types";
+import { MonthlyExpenseHistoryGroup, MonthlyExpenseHistoryRow, MonthlyTransactionHistoryGroup, MonthlyTransactionHistoryRow } from "@/lib/ui/dashboard-history-types";
 
-export function sortExpenseRowsByDateDesc(rows: MonthlyExpenseHistoryRow[]): MonthlyExpenseHistoryRow[] {
+export function sortExpenseRowsByDateDesc(rows: MonthlyTransactionHistoryRow[]): MonthlyTransactionHistoryRow[] {
   return [...rows].sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
-export function groupMonthlyExpenseHistory(rows: MonthlyExpenseHistoryRow[]): MonthlyExpenseHistoryGroup[] {
+export function groupMonthlyTransactionHistory(rows: MonthlyTransactionHistoryRow[]): MonthlyTransactionHistoryGroup[] {
   const sortedRows = sortExpenseRowsByDateDesc(rows);
-  const bucket = new Map<string, MonthlyExpenseHistoryRow[]>();
+  const bucket = new Map<string, MonthlyTransactionHistoryRow[]>();
 
   for (const row of sortedRows) {
     const monthRef = toMonthRef(row.date);
@@ -24,4 +24,9 @@ export function groupMonthlyExpenseHistory(rows: MonthlyExpenseHistoryRow[]): Mo
       isCollapsedByDefault: true,
       rows: groupedRows,
     }));
+}
+
+// Legacy alias retained while migrating naming in consumers.
+export function groupMonthlyExpenseHistory(rows: MonthlyExpenseHistoryRow[]): MonthlyExpenseHistoryGroup[] {
+  return groupMonthlyTransactionHistory(rows);
 }

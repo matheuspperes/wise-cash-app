@@ -1,5 +1,5 @@
-import { getMonthlySummaryContext, listCurrentMonthTransactions, listFullExpenseHistoryRows } from "@/lib/repositories/monthly-summary-repository";
-import { buildHistoricalTotalBalance, buildMonthlyExpenseHistoryGroups } from "@/lib/services/dashboard-history-mapper";
+import { getMonthlySummaryContext, listCurrentMonthTransactions, listFullTransactionsHistoryRows } from "@/lib/repositories/monthly-summary-repository";
+import { buildHistoricalTotalBalance, buildMonthlyTransactionHistoryGroups } from "@/lib/services/dashboard-history-mapper";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -12,8 +12,8 @@ export async function GET(req: NextRequest) {
   const latest = summaryContext.latest;
   const historicalBalance = buildHistoricalTotalBalance(areaSeries);
   const currentMonthTransactions = listCurrentMonthTransactions();
-  const fullExpenseHistoryRows = listFullExpenseHistoryRows();
-  const fullExpenseHistoryGroups = buildMonthlyExpenseHistoryGroups(fullExpenseHistoryRows);
+  const fullTransactionsHistoryRows = listFullTransactionsHistoryRows();
+  const fullTransactionsHistoryGroups = buildMonthlyTransactionHistoryGroups(fullTransactionsHistoryRows);
 
   return NextResponse.json({
     currentMonth: latest.month,
@@ -23,7 +23,9 @@ export async function GET(req: NextRequest) {
     currentMonthTransactions,
     // Legacy payload retained temporarily for compatibility.
     currentMonthExpenses: currentMonthTransactions,
-    fullExpenseHistoryGroups,
+    fullTransactionsHistoryGroups,
+    // Transitional alias; remove after consumers fully migrate.
+    fullExpenseHistoryGroups: fullTransactionsHistoryGroups,
     areaSeries,
   });
 }

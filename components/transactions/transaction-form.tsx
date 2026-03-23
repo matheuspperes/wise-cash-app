@@ -18,8 +18,17 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
+export type SavedTransactionPayload = {
+  id: string;
+  name: string;
+  type: "income" | "expense";
+  categoryName: string;
+  amount: number;
+  transactionDate: string;
+};
+
 type Props = {
-  onSaved?: () => void;
+  onSaved?: (transaction: SavedTransactionPayload) => void | Promise<void>;
 };
 
 const today = new Date().toISOString().slice(0, 10);
@@ -61,8 +70,15 @@ export function TransactionForm({ onSaved }: Props) {
       return;
     }
 
+    const json = await res.json();
+    const saved = json?.transaction as SavedTransactionPayload | undefined;
+    if (!saved) {
+      setError("name", { message: "Resposta inválida ao salvar transação." });
+      return;
+    }
+
     reset({ name: "", type: data.type, categoryId: data.categoryId, amount: "", transactionDate: data.transactionDate, observation: "" });
-    onSaved?.();
+    await onSaved?.(saved);
   }
 
   return (

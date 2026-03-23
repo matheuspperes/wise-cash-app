@@ -7,3 +7,7 @@ export function parseTransactionsView(value: string | null | undefined): Transac
 
   return value === "new" ? "new" : "history";
 }
+
+export function shouldResetTemporaryLaunches(previousView: TransactionsView | null, nextView: TransactionsView): boolean {
+  return previousView === "new" && nextView !== "new";
+}

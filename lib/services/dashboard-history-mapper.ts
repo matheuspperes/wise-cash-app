@@ -1,7 +1,7 @@
 import { MonthlyPoint } from "@/lib/repositories/monthly-summary-repository";
-import { groupMonthlyExpenseHistory } from "@/lib/services/monthly-expense-history";
+import { groupMonthlyTransactionHistory } from "@/lib/services/monthly-expense-history";
 import { Transaction } from "@/lib/repositories/in-memory-db";
-import { CurrentMonthTransactionRow, HistoricalTotalBalance, MonthlyExpenseHistoryGroup, MonthlyExpenseHistoryRow } from "@/lib/ui/dashboard-history-types";
+import { CurrentMonthTransactionRow, HistoricalTotalBalance, MonthlyExpenseHistoryGroup, MonthlyExpenseHistoryRow, MonthlyTransactionHistoryGroup, MonthlyTransactionHistoryRow } from "@/lib/ui/dashboard-history-types";
 
 export function buildHistoricalTotalBalance(series: MonthlyPoint[]): HistoricalTotalBalance {
   if (!series.length) {
@@ -26,8 +26,13 @@ export function buildHistoricalTotalBalance(series: MonthlyPoint[]): HistoricalT
   };
 }
 
+export function buildMonthlyTransactionHistoryGroups(rows: MonthlyTransactionHistoryRow[]): MonthlyTransactionHistoryGroup[] {
+  return groupMonthlyTransactionHistory(rows);
+}
+
+// Legacy alias retained for compatibility with existing consumer naming.
 export function buildMonthlyExpenseHistoryGroups(rows: MonthlyExpenseHistoryRow[]): MonthlyExpenseHistoryGroup[] {
-  return groupMonthlyExpenseHistory(rows);
+  return buildMonthlyTransactionHistoryGroups(rows);
 }
 
 export function mapTransactionToCurrentMonthRow(tx: Transaction): CurrentMonthTransactionRow {
