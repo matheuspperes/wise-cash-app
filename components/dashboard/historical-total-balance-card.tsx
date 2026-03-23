@@ -12,7 +12,7 @@ export function HistoricalTotalBalanceCard({ balance, isFetching = false }: Prop
   const positive = balance.netTotal >= 0;
 
   return (
-    <article className="w-full rounded-2xl border border-border bg-surface px-4 py-4 shadow-card md:max-w-[19.25rem] md:justify-self-end md:px-5 md:py-4">
+    <article className="w-full rounded-2xl border border-border bg-surface px-5 py-4 shadow-card md:px-6 md:py-5">
       <div className="flex min-h-[7.25rem] flex-col justify-center gap-3 text-left">
         <div className="flex items-center gap-2">
           <p className="text-xs text-muted md:text-sm">{uiText.historicalNetBalance}</p>

@@ -3,6 +3,7 @@
 import { formatMonthYearLabel } from "@/lib/formatting/ptbr";
 import { uiText } from "@/lib/i18n/ui-text";
 import { buildDynamicChartAxisProfile, formatAxisTickLabel } from "@/lib/services/chart-axis-profile";
+import { Select } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { memo } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -17,6 +18,8 @@ type Point = {
 
 type Props = {
   data: Point[];
+  months: number;
+  onMonthsChange: (value: number) => void;
   isFetching?: boolean;
 };
 
@@ -48,7 +51,7 @@ function CustomTooltip({ active, label, payload }: { active?: boolean; label?: s
   );
 }
 
-function AreaHistoryChartInner({ data, isFetching = false }: Props) {
+function AreaHistoryChartInner({ data, months, onMonthsChange, isFetching = false }: Props) {
   if (!data.length) {
     return <div className="rounded-2xl border border-border bg-surface p-5 text-base text-muted shadow-card">Sem dados históricos.</div>;
   }
@@ -63,8 +66,8 @@ function AreaHistoryChartInner({ data, isFetching = false }: Props) {
           {isFetching ? <span className="text-sm text-muted">{uiText.syncStatus}</span> : null}
         </div>
       </div>
-      <div className="mb-2 flex justify-end">
-        <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-sm text-muted">
+      <div className="mb-2 flex items-center justify-between gap-2 overflow-x-auto">
+        <div className="flex min-w-0 flex-nowrap items-center gap-3 text-sm text-muted">
           <span className="inline-flex items-center gap-1.5">
             <span aria-hidden className="h-2 w-2 rounded-full bg-[#66ffc3]" />
             Receitas
@@ -74,6 +77,11 @@ function AreaHistoryChartInner({ data, isFetching = false }: Props) {
             Despesas
           </span>
         </div>
+        <Select className="w-[7.25rem] min-w-[6.5rem] sm:w-32" value={months} onChange={(e) => onMonthsChange(Number(e.target.value))}>
+          <option value={3}>3 meses</option>
+          <option value={6}>6 meses</option>
+          <option value={12}>12 meses</option>
+        </Select>
       </div>
       <div className="min-h-0 flex-1">
         <ResponsiveContainer width="100%" height="100%">

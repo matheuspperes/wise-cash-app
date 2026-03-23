@@ -8,7 +8,6 @@ import { CurrentMonthExpensesTable } from "@/components/dashboard/current-month-
 import { HistoricalTotalBalanceCard } from "@/components/dashboard/historical-total-balance-card";
 import { NetBalanceCard } from "@/components/dashboard/net-balance-card";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/input";
 import { uiText } from "@/lib/i18n/ui-text";
 import { CurrentMonthTransactionRow, HistoricalTotalBalance, MonthlyExpenseHistoryGroup } from "@/lib/ui/dashboard-history-types";
 import { getVisualDataState } from "@/lib/ui/data-state";
@@ -72,16 +71,11 @@ export function DashboardPageClient() {
       <DashboardHeader
         controls={(
           <div className="flex w-full flex-wrap items-center justify-end gap-2 md:w-auto md:gap-3">
-            <Select className="w-36 md:w-40" value={months} onChange={(e) => setMonths(Number(e.target.value))}>
-              <option value={3}>3 meses</option>
-              <option value={6}>6 meses</option>
-              <option value={12}>12 meses</option>
-            </Select>
             <Button asChild className="h-10 border border-border/80 bg-surface-alt/80 px-3 text-sm shadow-card hover:bg-surface" size="md" variant="secondary">
               <Link aria-label="Transações" href={transactionsHistoryHref}>Transações</Link>
             </Button>
             <Button asChild className="h-10 bg-[var(--primary-cta)] px-4 text-sm text-white shadow-elevated hover:brightness-110" size="md">
-              <Link aria-label="Nova Transacao" href={transactionsCreateHref}>Nova Transacao</Link>
+              <Link aria-label="Nova Transação" href={transactionsCreateHref}>Nova Transação</Link>
             </Button>
           </div>
         )}
@@ -98,12 +92,12 @@ export function DashboardPageClient() {
           initial={{ opacity: 0, y: 8 }}
           transition={{ duration: 0.22, ease: "easeOut" }}
         >
-          <div className="grid items-stretch gap-4 md:grid-cols-[1fr_0.45fr]">
+          <div className="grid items-stretch gap-4 md:grid-cols-2">
             <NetBalanceCard isFetching={query.isFetching} value={summary.netBalance} />
             <HistoricalTotalBalanceCard balance={summary.historicalBalance} isFetching={query.isFetching} />
           </div>
           <div className="-mt-1">
-            <AreaHistoryChart data={summary.areaSeries} isFetching={query.isFetching} />
+            <AreaHistoryChart data={summary.areaSeries} isFetching={query.isFetching} months={months} onMonthsChange={setMonths} />
           </div>
           <CurrentMonthExpensesTable isFetching={query.isFetching} rows={summary.currentMonthTransactions} />
         </motion.div>

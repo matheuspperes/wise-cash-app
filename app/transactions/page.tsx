@@ -125,7 +125,12 @@ export default function TransactionsPage() {
 
   return (
     <main className="mx-auto flex max-w-[76.8rem] flex-col gap-5 p-5">
-      <h1 className="text-[1.9rem] font-bold">Transações</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-[1.9rem] font-bold">Transações</h1>
+        <Button asChild className={historyStyleBase} size="md" variant="secondary">
+          <Link href="/">Voltar ao Dashboard</Link>
+        </Button>
+      </div>
 
       {showNew ? (
         <>
@@ -163,11 +168,6 @@ export default function TransactionsPage() {
 
       {showHistory ? (
         <>
-          <div className="flex justify-end">
-            <Button asChild className={historyStyleBase} size="md" variant="secondary">
-              <Link href={newViewHref}>Nova transação</Link>
-            </Button>
-          </div>
           <TransactionSearch value={q} onChange={onSearchChange} />
           <TransactionFilters value={filters} onChange={onFilterChange} />
           {shouldShowFilteredResults ? (
@@ -194,6 +194,11 @@ export default function TransactionsPage() {
             </section>
           ) : null}
           <MonthlyExpenseHistoryAccordion groups={monthlyExpenseGroups} isLoading={isLoadingMonthlyHistory} />
+          <div className="pt-1 text-right">
+            <Button asChild className="h-10 bg-[var(--primary-cta)] px-4 text-sm text-white shadow-elevated hover:brightness-110" size="md">
+              <Link href={newViewHref}>Nova Transação</Link>
+            </Button>
+          </div>
         </>
       ) : null}
     </main>
