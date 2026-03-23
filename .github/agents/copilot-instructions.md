@@ -23,6 +23,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-23
 - N/A (layout/UX and navigation refinement only) (012-refine-balance-cta-layout)
 - TypeScript 5.8, React 18, Next.js 15 App Router + Tailwind CSS utility classes, Next Link/navigation, TanStack Query (existing dashboard summary flow), Framer Motion (existing dashboard transitions) (013-refine-dashboard-transactions-layout)
 - N/A (UI layout/navigation refinement only) (013-refine-dashboard-transactions-layout)
+- TypeScript 5.8, React 18, Next.js 15 App Router + React Hook Form, Zod, Tailwind CSS utility classes, Next Link/navigation, existing UI primitives (`components/ui/button`, `components/ui/input`) (014-refine-transaction-form)
+- Existing app persistence paths for categories/transactions (no schema migration planned for this feature) (014-refine-transaction-form)
 
 - TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x) + Next.js, Tailwind CSS, Shadcn/UI, TanStack Query, Supabase JS, Recharts (001-monthly-finance-manager)
 
@@ -43,9 +45,9 @@ npm test; npm run lint
 TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x): Follow standard conventions
 
 ## Recent Changes
+- 014-refine-transaction-form: Added TypeScript 5.8, React 18, Next.js 15 App Router + React Hook Form, Zod, Tailwind CSS utility classes, Next Link/navigation, existing UI primitives (`components/ui/button`, `components/ui/input`)
 - 013-refine-dashboard-transactions-layout: Added TypeScript 5.8, React 18, Next.js 15 App Router + Tailwind CSS utility classes, Next Link/navigation, TanStack Query (existing dashboard summary flow), Framer Motion (existing dashboard transitions)
 - 012-refine-balance-cta-layout: Added TypeScript 5.8, React 18, Next.js 15 App Router + Tailwind CSS utility classes, Next Link/navigation, TanStack Query (dashboard data already in use)
-- 011-align-header-balance-cards: Added TypeScript 5.8, React 18, Next.js 15 App Router + Tailwind CSS utility classes, Framer Motion (existing dashboard transitions), TanStack Query (existing summary fetch)
 
 
 <!-- MANUAL ADDITIONS START -->

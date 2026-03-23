@@ -65,16 +65,22 @@ export function DashboardPageClient() {
 
   const transactionsHistoryHref = useMemo(() => "/transactions?view=history", []);
   const transactionsCreateHref = useMemo(() => "/transactions?view=new", []);
+  const ctaPaddingClasses = "h-10 px-4 py-2 text-sm";
 
   return (
     <main className="mx-auto flex max-w-[76.8rem] flex-col gap-5 px-5 pb-28 pt-5 md:pb-5">
       <DashboardHeader
         controls={(
           <div className="flex w-full flex-wrap items-center justify-end gap-2 md:w-auto md:gap-3">
-            <Button asChild className="h-10 border border-border/80 bg-surface-alt/80 px-3 text-sm shadow-card hover:bg-surface" size="md" variant="secondary">
+            <Button
+              asChild
+              className={`${ctaPaddingClasses} border border-[rgba(59,130,246,0.25)] bg-[rgba(59,130,246,0.12)] text-[var(--primary-cta)] shadow-card hover:bg-[rgba(59,130,246,0.18)]`}
+              size="md"
+              variant="secondary"
+            >
               <Link aria-label="Transações" href={transactionsHistoryHref}>Transações</Link>
             </Button>
-            <Button asChild className="h-10 bg-[var(--primary-cta)] px-4 text-sm text-white shadow-elevated hover:brightness-110" size="md">
+            <Button asChild className={`${ctaPaddingClasses} bg-[var(--primary-cta)] text-white shadow-elevated hover:brightness-110`} size="md">
               <Link aria-label="Nova Transação" href={transactionsCreateHref}>Nova Transação</Link>
             </Button>
           </div>
