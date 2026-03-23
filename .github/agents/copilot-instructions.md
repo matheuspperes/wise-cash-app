@@ -19,6 +19,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-23
 - Existing in-memory repository flow (`lib/repositories/in-memory-db.ts`), plus transient in-page state for temporary launches table (010-refine-transactions-history-entry)
 - TypeScript 5.8, React 18, Next.js 15 App Router + Tailwind CSS utility classes, Framer Motion (existing dashboard transitions), TanStack Query (existing summary fetch) (011-align-header-balance-cards)
 - N/A for persistence changes (layout-only feature) (011-align-header-balance-cards)
+- TypeScript 5.8, React 18, Next.js 15 App Router + Tailwind CSS utility classes, Next Link/navigation, TanStack Query (dashboard data already in use) (012-refine-balance-cta-layout)
+- N/A (layout/UX and navigation refinement only) (012-refine-balance-cta-layout)
 
 - TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x) + Next.js, Tailwind CSS, Shadcn/UI, TanStack Query, Supabase JS, Recharts (001-monthly-finance-manager)
 
@@ -39,9 +41,9 @@ npm test; npm run lint
 TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x): Follow standard conventions
 
 ## Recent Changes
+- 012-refine-balance-cta-layout: Added TypeScript 5.8, React 18, Next.js 15 App Router + Tailwind CSS utility classes, Next Link/navigation, TanStack Query (dashboard data already in use)
 - 011-align-header-balance-cards: Added TypeScript 5.8, React 18, Next.js 15 App Router + Tailwind CSS utility classes, Framer Motion (existing dashboard transitions), TanStack Query (existing summary fetch)
 - 010-refine-transactions-history-entry: Added TypeScript 5.8, React 18, Next.js 15 App Router + TanStack Query, React Hook Form, Zod, existing UI primitives (`components/ui`)
-- 009-remove-demo-transactions-flow: Added TypeScript 5.8, React 18, Next.js 15 App Router + TanStack Query, Recharts, Framer Motion, React Hook Form, Zod
 
 
 <!-- MANUAL ADDITIONS START -->
