@@ -64,20 +64,24 @@ export function DashboardPageClient() {
     [query.data],
   );
 
+  const transactionsHistoryHref = useMemo(() => "/transactions?view=history", []);
   const transactionsCreateHref = useMemo(() => "/transactions?view=new", []);
 
   return (
     <main className="mx-auto flex max-w-[76.8rem] flex-col gap-5 px-5 pb-28 pt-5 md:pb-5">
       <DashboardHeader
         controls={(
-          <div className="flex w-full items-center justify-end gap-3 md:w-auto md:gap-4">
-            <Select className="w-40" value={months} onChange={(e) => setMonths(Number(e.target.value))}>
+          <div className="flex w-full flex-wrap items-center justify-end gap-2 md:w-auto md:gap-3">
+            <Select className="w-36 md:w-40" value={months} onChange={(e) => setMonths(Number(e.target.value))}>
               <option value={3}>3 meses</option>
               <option value={6}>6 meses</option>
               <option value={12}>12 meses</option>
             </Select>
-            <Button asChild className="h-10 w-10 rounded-full bg-[var(--primary-cta)] p-0 text-[1.4rem] leading-none text-white shadow-elevated hover:brightness-110" size="ctaIcon">
-              <Link aria-label="Nova transação" href={transactionsCreateHref}>+</Link>
+            <Button asChild className="h-10 border border-border/80 bg-surface-alt/80 px-3 text-sm shadow-card hover:bg-surface" size="md" variant="secondary">
+              <Link aria-label="Transações" href={transactionsHistoryHref}>Transações</Link>
+            </Button>
+            <Button asChild className="h-10 bg-[var(--primary-cta)] px-4 text-sm text-white shadow-elevated hover:brightness-110" size="md">
+              <Link aria-label="Nova Transacao" href={transactionsCreateHref}>Nova Transacao</Link>
             </Button>
           </div>
         )}
@@ -94,7 +98,7 @@ export function DashboardPageClient() {
           initial={{ opacity: 0, y: 8 }}
           transition={{ duration: 0.22, ease: "easeOut" }}
         >
-          <div className="grid items-stretch gap-4 md:grid-cols-[1fr_0.56fr]">
+          <div className="grid items-stretch gap-4 md:grid-cols-[1fr_0.45fr]">
             <NetBalanceCard isFetching={query.isFetching} value={summary.netBalance} />
             <HistoricalTotalBalanceCard balance={summary.historicalBalance} isFetching={query.isFetching} />
           </div>

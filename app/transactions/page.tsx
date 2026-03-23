@@ -4,6 +4,7 @@ import { TransactionFilters } from "@/components/transactions/transaction-filter
 import { SavedTransactionPayload, TransactionForm } from "@/components/transactions/transaction-form";
 import { MonthlyExpenseHistoryAccordion } from "@/components/transactions/monthly-expense-history-accordion";
 import { TransactionSearch } from "@/components/transactions/transaction-search";
+import { Button } from "@/components/ui/button";
 import { formatCurrencyBRL, formatDateBR } from "@/lib/formatting/ptbr";
 import { uiText } from "@/lib/i18n/ui-text";
 import { MonthlyExpenseHistoryGroup } from "@/lib/ui/dashboard-history-types";
@@ -36,6 +37,11 @@ export default function TransactionsPage() {
   const [isLoadingMonthlyHistory, setIsLoadingMonthlyHistory] = useState(false);
   const [q, setQ] = useState("");
   const [filters, setFilters] = useState<TransactionsFilterState>({});
+
+  const historyViewHref = "/transactions?view=history";
+  const newViewHref = "/transactions?view=new";
+
+  const historyStyleBase = "h-10 border border-border/80 bg-surface-alt text-foreground shadow-card hover:bg-surface";
 
   const load = useCallback(async () => {
     const query = new URLSearchParams();
@@ -148,15 +154,20 @@ export default function TransactionsPage() {
           ) : null}
 
           <div className="-mt-1 text-right text-sm text-muted">
-            <Link className="underline hover:text-foreground" href="/transactions?view=history">
-              Ver histórico de transações
-            </Link>
+            <Button asChild className={historyStyleBase} size="md" variant="secondary">
+              <Link href={historyViewHref}>Ver histórico de transações</Link>
+            </Button>
           </div>
         </>
       ) : null}
 
       {showHistory ? (
         <>
+          <div className="flex justify-end">
+            <Button asChild className={historyStyleBase} size="md" variant="secondary">
+              <Link href={newViewHref}>Nova transação</Link>
+            </Button>
+          </div>
           <TransactionSearch value={q} onChange={onSearchChange} />
           <TransactionFilters value={filters} onChange={onFilterChange} />
           {shouldShowFilteredResults ? (
