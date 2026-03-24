@@ -1,8 +1,8 @@
 export type TransactionType = "expense" | "income";
 
 export const expenseCategoryPresets = [
-  "Casa",
   "Carro",
+  "Casa",
   "Comida",
   "Educacao",
   "Mercado",
