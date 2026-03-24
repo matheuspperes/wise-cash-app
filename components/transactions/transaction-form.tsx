@@ -197,10 +197,7 @@ export function TransactionForm({ onSaved }: Props) {
                     ? "rounded-md px-3 py-2 text-sm font-semibold text-red-200 transition-colors duration-200 bg-[rgba(239,68,68,0.2)]"
                     : "rounded-md px-3 py-2 text-sm font-semibold text-muted transition-colors duration-200 hover:bg-surface"
                   }
-                  onClick={() => {
-                    field.onChange("expense");
-                    handleTypeSelection("expense");
-                  }}
+                  onClick={() => handleTypeSelection("expense")}
                   type="button"
                 >
                   Despesa
@@ -211,10 +208,7 @@ export function TransactionForm({ onSaved }: Props) {
                     ? "rounded-md px-3 py-2 text-sm font-semibold text-emerald-200 transition-colors duration-200 bg-[rgba(34,197,94,0.2)]"
                     : "rounded-md px-3 py-2 text-sm font-semibold text-muted transition-colors duration-200 hover:bg-surface"
                   }
-                  onClick={() => {
-                    field.onChange("income");
-                    handleTypeSelection("income");
-                  }}
+                  onClick={() => handleTypeSelection("income")}
                   type="button"
                 >
                   Receita
