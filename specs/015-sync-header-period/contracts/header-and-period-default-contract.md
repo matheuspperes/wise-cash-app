@@ -9,7 +9,7 @@ Define behavior contracts for:
 - Surface: `/transactions` route family (base and query variants)
 - Required Behavior:
   - Header follows same visual container/pattern as dashboard header.
-  - Header title is `Transacoes`.
+  - Header title is `Transações`.
   - Header controls expose only `Voltar ao dashboard`.
   - Back action preserves existing route destination and semantics.
 - Rule: Applies to all route variants (`/transactions`, `?view=history`, `?view=new`, and default state).
