@@ -5,6 +5,7 @@ import { SavedTransactionPayload, TransactionForm } from "@/components/transacti
 import { MonthlyExpenseHistoryAccordion } from "@/components/transactions/monthly-expense-history-accordion";
 import { TransactionSearch } from "@/components/transactions/transaction-search";
 import { Button } from "@/components/ui/button";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { formatCurrencyBRL, formatDateBR } from "@/lib/formatting/ptbr";
 import { uiText } from "@/lib/i18n/ui-text";
 import { MonthlyExpenseHistoryGroup } from "@/lib/ui/dashboard-history-types";
@@ -125,12 +126,14 @@ export default function TransactionsPageClient() {
 
   return (
     <main className="mx-auto flex max-w-[76.8rem] flex-col gap-5 p-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-[1.9rem] font-bold">Transações</h1>
-        <Button asChild className={historyStyleBase} size="md" variant="secondary">
-          <Link href="/">Voltar ao Dashboard</Link>
-        </Button>
-      </div>
+      <DashboardHeader
+        controls={(
+          <Button asChild className={historyStyleBase} size="md" variant="secondary">
+            <Link href="/">Voltar ao Dashboard</Link>
+          </Button>
+        )}
+        title="Transações"
+      />
 
       {showNew ? (
         <>

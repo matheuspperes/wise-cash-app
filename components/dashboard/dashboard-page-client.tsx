@@ -9,6 +9,7 @@ import { HistoricalTotalBalanceCard } from "@/components/dashboard/historical-to
 import { NetBalanceCard } from "@/components/dashboard/net-balance-card";
 import { Button } from "@/components/ui/button";
 import { uiText } from "@/lib/i18n/ui-text";
+import { resolveDashboardInitialMonths } from "@/lib/ui/dashboard-period-default";
 import { CurrentMonthTransactionRow, HistoricalTotalBalance, MonthlyExpenseHistoryGroup } from "@/lib/ui/dashboard-history-types";
 import { getVisualDataState } from "@/lib/ui/data-state";
 import { useQuery } from "@tanstack/react-query";
@@ -29,7 +30,7 @@ type Summary = {
 };
 
 export function DashboardPageClient() {
-  const [months, setMonths] = useState(12);
+  const [months, setMonths] = useState(() => resolveDashboardInitialMonths());
 
   const query = useQuery<Summary>({
     queryKey: ["dashboard-summary", months],
