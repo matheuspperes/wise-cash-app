@@ -132,7 +132,7 @@ export default function TransactionsPageClient() {
             <Link href="/">Voltar ao Dashboard</Link>
           </Button>
         )}
-        title="Transações"
+        title={uiText.transactions}
       />
 
       {showNew ? (
