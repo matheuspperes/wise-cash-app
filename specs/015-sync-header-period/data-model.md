@@ -4,13 +4,13 @@
 - Description: Represents the contextual header presentation for `/transactions` variants.
 - Fields:
   - route: string (`/transactions` with optional query variants)
-  - titleText: string (`Transacoes`)
+  - titleText: string (`Transações`)
   - controls:
     - showBackToDashboard: boolean
     - hideOtherHeaderActions: boolean
   - visualProfile: string (`same-as-dashboard-header`)
 - Validation Rules:
-  - Title must be `Transacoes` in all `/transactions` variants.
+  - Title must be `Transações` in all `/transactions` variants.
   - Exactly one header action is shown: `Voltar ao dashboard`.
   - Header spacing/container style matches dashboard header pattern.
 
