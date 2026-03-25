@@ -27,19 +27,19 @@
   - Demonstrated to users independently
 -->
 
-### User Story 1 - Unificar Header em Transacoes (Priority: P1)
+### User Story 1 - Unificar Header em Transações (Priority: P1)
 
-Como usuario, eu quero que a pagina de Transacoes use o mesmo padrao visual de header da pagina inicial, para manter consistencia de navegacao e reconhecimento da interface.
+Como usuario, eu quero que a pagina de Transações use o mesmo padrao visual de header da pagina inicial, para manter consistencia de navegacao e reconhecimento da interface.
 
 **Why this priority**: O header e um elemento de navegacao primario e inconsistencia visual causa atrito imediato no fluxo diario.
 
-**Independent Validation**: Pode ser validada abrindo a rota de Transacoes e confirmando que estrutura/estilo do header seguem o padrao da pagina inicial, com titulo "Transacoes" e apenas botao "Voltar ao dashboard".
+**Independent Validation**: Pode ser validada abrindo a rota de Transações e confirmando que estrutura/estilo do header seguem o padrao da pagina inicial, com titulo "Transações" e apenas botao "Voltar ao dashboard".
 
 **Acceptance Scenarios**:
 
-1. **Given** que o usuario abre a rota de Transacoes, **When** o header e exibido, **Then** ele usa o mesmo estilo visual da pagina inicial.
-2. **Given** que o usuario esta na rota de Transacoes, **When** observa o texto principal do header, **Then** o titulo mostrado e "Transacoes".
-3. **Given** que o usuario esta na rota de Transacoes, **When** observa as acoes do header, **Then** apenas o botao "Voltar ao dashboard" e exibido com o estilo esperado.
+1. **Given** que o usuario abre a rota de Transações, **When** o header e exibido, **Then** ele usa o mesmo estilo visual da pagina inicial.
+2. **Given** que o usuario esta na rota de Transações, **When** observa o texto principal do header, **Then** o titulo mostrado e "Transações".
+3. **Given** que o usuario esta na rota de Transações, **When** observa as acoes do header, **Then** apenas o botao "Voltar ao dashboard" e exibido com o estilo esperado.
 
 ---
 
