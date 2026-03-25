@@ -8,8 +8,8 @@ export function parsePersistedDashboardMonths(rawValue: string | null): number |
     return null;
   }
 
-  const parsedValue = Number.parseInt(rawValue, 10);
-  if (Number.isNaN(parsedValue) || parsedValue <= 0) {
+  const parsedValue = Number(rawValue);
+  if (!Number.isFinite(parsedValue) || !Number.isInteger(parsedValue) || parsedValue <= 0) {
     return null;
   }
 
