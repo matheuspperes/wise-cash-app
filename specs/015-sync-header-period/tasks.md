@@ -31,11 +31,11 @@
 
 ---
 
-## Phase 3: User Story 1 - Unificar Header em Transacoes (Priority: P1) MVP
+## Phase 3: User Story 1 - Unificar Header em Transações (Priority: P1) MVP
 
-**Goal**: Reuse dashboard header pattern in all `/transactions` variants with title `Transacoes` and only `Voltar ao dashboard` control.
+**Goal**: Reuse dashboard header pattern in all `/transactions` variants with title `Transações` and only `Voltar ao dashboard` control.
 
-**Independent Validation**: Open `/transactions`, `/transactions?view=history`, and `/transactions?view=new` and confirm same header structure, `Transacoes` title, and single back action preserving navigation.
+**Independent Validation**: Open `/transactions`, `/transactions?view=history`, and `/transactions?view=new` and confirm same header structure, `Transações` title, and single back action preserving navigation.
 
 ### Manual Validation for User Story 1 (REQUIRED)
 
