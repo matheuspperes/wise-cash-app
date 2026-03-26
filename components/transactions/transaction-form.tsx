@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
 import { extractDigits, formatBrlFromDigits, parseBrlDisplayToAmount } from "@/lib/formatting/brl-currency-mask";
 import { uiText } from "@/lib/i18n/ui-text";
+import { createLocalTransaction } from "@/lib/services/local-transactions-gateway";
+import { StorageUnavailableError } from "@/lib/storage/local-storage-health";
 import { hasDuplicateNormalizedCategory } from "@/lib/ui/category-normalization";
 import { getCategoryPresetsByType, TransactionType } from "@/lib/ui/transaction-category-presets";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -135,19 +137,25 @@ export function TransactionForm({ onSaved }: Props) {
       return;
     }
 
-    const res = await fetch("/api/transactions", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ...data, categoryId: resolvedCategoryId, notes: data.observation, amount }),
-    });
+    let saved: SavedTransactionPayload | undefined;
+    try {
+      const response = await createLocalTransaction({
+        ...data,
+        categoryId: resolvedCategoryId,
+        notes: data.observation,
+        amount,
+      });
+      saved = response.transaction as SavedTransactionPayload | undefined;
+    } catch (error) {
+      if (error instanceof StorageUnavailableError) {
+        setError("name", { message: "Armazenamento local indisponível. Verifique as permissões do navegador." });
+        return;
+      }
 
-    if (!res.ok) {
       setError("name", { message: "Não foi possível salvar a transação." });
       return;
     }
 
-    const json = await res.json();
-    const saved = json?.transaction as SavedTransactionPayload | undefined;
     if (!saved) {
       setError("name", { message: "Resposta inválida ao salvar transação." });
       return;

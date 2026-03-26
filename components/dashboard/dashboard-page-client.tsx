@@ -9,6 +9,8 @@ import { HistoricalTotalBalanceCard } from "@/components/dashboard/historical-to
 import { NetBalanceCard } from "@/components/dashboard/net-balance-card";
 import { Button } from "@/components/ui/button";
 import { uiText } from "@/lib/i18n/ui-text";
+import { getLocalDashboardSummary } from "@/lib/services/local-dashboard-summary";
+import { StorageUnavailableError } from "@/lib/storage/local-storage-health";
 import { resolveDashboardInitialMonths } from "@/lib/ui/dashboard-period-default";
 import { CurrentMonthTransactionRow, HistoricalTotalBalance, MonthlyExpenseHistoryGroup } from "@/lib/ui/dashboard-history-types";
 import { getVisualDataState } from "@/lib/ui/data-state";
@@ -35,12 +37,15 @@ export function DashboardPageClient() {
   const query = useQuery<Summary>({
     queryKey: ["dashboard-summary", months],
     queryFn: async () => {
-      const response = await fetch(`/api/dashboard/summary?months=${months}`);
-      if (!response.ok) {
+      try {
+        return await getLocalDashboardSummary(months);
+      } catch (error) {
+        if (error instanceof StorageUnavailableError) {
+          throw new Error("Armazenamento local indisponível. Verifique as permissões do navegador.");
+        }
+
         throw new Error(uiText.loadingError);
       }
-
-      return response.json();
     },
   });
 

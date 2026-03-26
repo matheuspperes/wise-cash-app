@@ -1,17 +1,19 @@
 import { createTransaction, findTransactionById, updateTransaction } from "@/lib/repositories/transaction-repository";
-import { Transaction } from "@/lib/repositories/in-memory-db";
+import { TransactionRecord } from "@/lib/repositories/local-finance-contracts";
 import { createRecurrenceRule, generateNextRecurrence } from "@/lib/services/recurrence-service";
 import { normalizeAmount } from "@/lib/validation/amount-normalization";
 import { TransactionInput } from "@/lib/validation/transaction-schema";
+import { getActiveOwnerScope } from "@/lib/storage/scoped-db";
 
-export function createTransactionFromInput(input: TransactionInput) {
+export async function createTransactionFromInput(input: TransactionInput, ownerScope = getActiveOwnerScope()) {
   const recurrenceRuleId =
     input.recurrence?.enabled && input.recurrence.dayOfMonth
-      ? createRecurrenceRule(input.recurrence.dayOfMonth).id
+      ? (await createRecurrenceRule(input.recurrence.dayOfMonth, ownerScope)).id
       : null;
 
-  const transaction: Transaction = {
+  const transaction: Omit<TransactionRecord, "nameNormalized" | "categoryNameNormalized" | "notesNormalized"> = {
     id: crypto.randomUUID(),
+    ownerScope,
     name: input.name,
     type: input.type,
     categoryId: input.categoryId,
@@ -26,25 +28,25 @@ export function createTransactionFromInput(input: TransactionInput) {
     updatedAt: new Date().toISOString(),
   };
 
-  const created = createTransaction(transaction);
+  const created = await createTransaction(transaction);
   if (created.recurrenceRuleId) {
-    generateNextRecurrence(created);
+    await generateNextRecurrence(created, ownerScope);
   }
 
   return created;
 }
 
-export function applyRecurrenceForTransaction(id: string) {
-  const tx = findTransactionById(id);
+export async function applyRecurrenceForTransaction(id: string, ownerScope = getActiveOwnerScope()) {
+  const tx = await findTransactionById(id, ownerScope);
   if (!tx) {
     return null;
   }
 
-  return generateNextRecurrence(tx);
+  return generateNextRecurrence(tx, ownerScope);
 }
 
-export function patchTransaction(id: string, patch: Partial<TransactionInput>) {
-  const nextPatch: Partial<Transaction> = {};
+export async function patchTransaction(id: string, patch: Partial<TransactionInput>, ownerScope = getActiveOwnerScope()) {
+  const nextPatch: Partial<TransactionRecord> = {};
   if (patch.name !== undefined) nextPatch.name = patch.name;
   if (patch.type !== undefined) nextPatch.type = patch.type;
   if (patch.categoryId !== undefined) {
@@ -55,5 +57,5 @@ export function patchTransaction(id: string, patch: Partial<TransactionInput>) {
   if (patch.transactionDate !== undefined) nextPatch.transactionDate = patch.transactionDate;
   if (patch.notes !== undefined) nextPatch.notes = patch.notes;
 
-  return updateTransaction(id, nextPatch);
+  return updateTransaction(id, nextPatch, ownerScope);
 }
