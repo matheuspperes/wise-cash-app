@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     return badRequest("Formato de exportacao invalido");
   }
 
-  const items = searchTransactions({
+  const items = await searchTransactions({
     from: url.searchParams.get("from") ?? undefined,
     to: url.searchParams.get("to") ?? undefined,
   });

@@ -16,8 +16,8 @@ export type MonthlySummaryContext = {
   latest: MonthlyPoint;
 };
 
-export function getMonthlySummary(months = 12) {
-  const txs = listTransactions();
+export async function getMonthlySummary(months = 12, ownerScope?: string) {
+  const txs = await listTransactions({}, ownerScope);
   const bucket = new Map<string, MonthlyPoint>();
 
   for (const tx of txs) {
@@ -42,8 +42,8 @@ export function getMonthlySummary(months = 12) {
   return realSeries.map((point) => ({ ...point, month: formatMonthYearLabel(point.monthRef) }));
 }
 
-export function getMonthlySummaryContext(months = 12): MonthlySummaryContext {
-  const series = getMonthlySummary(months);
+export async function getMonthlySummaryContext(months = 12, ownerScope?: string): Promise<MonthlySummaryContext> {
+  const series = await getMonthlySummary(months, ownerScope);
   const latest = series[series.length - 1] ?? { monthRef: "", month: "", income: 0, expense: 0, net: 0 };
 
   return {
@@ -52,8 +52,8 @@ export function getMonthlySummaryContext(months = 12): MonthlySummaryContext {
   };
 }
 
-export function listFullTransactionsHistoryRows(): MonthlyTransactionHistoryRow[] {
-  return listTransactions()
+export async function listFullTransactionsHistoryRows(ownerScope?: string): Promise<MonthlyTransactionHistoryRow[]> {
+  return (await listTransactions({}, ownerScope))
     .sort((a, b) => (a.transactionDate < b.transactionDate ? 1 : -1))
     .map((tx) => ({
       date: tx.transactionDate,
@@ -65,10 +65,10 @@ export function listFullTransactionsHistoryRows(): MonthlyTransactionHistoryRow[
 }
 
 // Legacy alias retained for compatibility with existing references.
-export function listFullExpenseHistoryRows(): MonthlyExpenseHistoryRow[] {
-  return listFullTransactionsHistoryRows();
+export async function listFullExpenseHistoryRows(ownerScope?: string): Promise<MonthlyExpenseHistoryRow[]> {
+  return listFullTransactionsHistoryRows(ownerScope);
 }
 
-export function listCurrentMonthTransactions(referenceDate: Date = new Date()): CurrentMonthTransactionRow[] {
-  return listCurrentMonthTransactionRows(referenceDate);
+export async function listCurrentMonthTransactions(referenceDate: Date = new Date(), ownerScope?: string): Promise<CurrentMonthTransactionRow[]> {
+  return listCurrentMonthTransactionRows(referenceDate, ownerScope);
 }

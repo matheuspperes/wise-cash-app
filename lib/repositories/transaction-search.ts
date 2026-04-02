@@ -1,25 +1,19 @@
 import { listTransactions } from "@/lib/repositories/transaction-repository";
+import { TransactionSearchParams } from "@/lib/repositories/local-finance-contracts";
+import { normalizeTextForSearch } from "@/lib/repositories/text-normalization";
 
-type SearchParams = {
-  q?: string;
-  from?: string;
-  to?: string;
-  type?: "income" | "expense";
-  categoryId?: string;
-};
-
-export function searchTransactions(params: SearchParams) {
-  const base = listTransactions(params);
+export async function searchTransactions(params: TransactionSearchParams, ownerScope?: string) {
+  const base = await listTransactions(params, ownerScope);
   if (!params.q) {
     return base;
   }
 
-  const q = params.q.toLocaleLowerCase("pt-BR");
+  const q = normalizeTextForSearch(params.q);
   return base.filter((tx) => {
-    const notes = tx.notes?.toLocaleLowerCase("pt-BR") ?? "";
+    const notes = tx.notesNormalized;
     return (
-      tx.name.toLocaleLowerCase("pt-BR").includes(q) ||
-      tx.categoryName.toLocaleLowerCase("pt-BR").includes(q) ||
+      tx.nameNormalized.includes(q) ||
+      tx.categoryNameNormalized.includes(q) ||
       notes.includes(q)
     );
   });

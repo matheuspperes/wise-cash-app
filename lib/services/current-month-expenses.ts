@@ -8,10 +8,10 @@ function monthKeyFromDate(date: Date): string {
   return `${year}-${month}`;
 }
 
-export function listCurrentMonthTransactionRows(referenceDate: Date = new Date()): CurrentMonthTransactionRow[] {
+export async function listCurrentMonthTransactionRows(referenceDate: Date = new Date(), ownerScope?: string): Promise<CurrentMonthTransactionRow[]> {
   const currentMonth = monthKeyFromDate(referenceDate);
 
-  return listTransactions()
+  return (await listTransactions({}, ownerScope))
     .filter((tx) => tx.transactionDate.startsWith(currentMonth))
     .sort((a, b) => (a.transactionDate < b.transactionDate ? 1 : -1))
     .map(mapTransactionToCurrentMonthRow);

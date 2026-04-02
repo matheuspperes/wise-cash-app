@@ -1,17 +1,27 @@
-import { getStore, RecurrenceRule, Transaction } from "@/lib/repositories/in-memory-db";
+import { RecurrenceRuleRecord, TransactionRecord } from "@/lib/repositories/local-finance-contracts";
+import { createTransaction } from "@/lib/repositories/transaction-repository";
+import { getDexieDb } from "@/lib/storage/dexie-db";
+import { assertLocalStorageAvailable } from "@/lib/storage/local-storage-health";
+import { getActiveOwnerScope } from "@/lib/storage/scoped-db";
 
 function getLastDayOfMonth(date: Date) {
   return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 }
 
-export function createRecurrenceRule(dayOfMonth: number): RecurrenceRule {
-  const store = getStore();
-  const rule: RecurrenceRule = {
+export async function createRecurrenceRule(dayOfMonth: number, ownerScope = getActiveOwnerScope()): Promise<RecurrenceRuleRecord> {
+  assertLocalStorageAvailable();
+  const db = getDexieDb();
+  const now = new Date().toISOString();
+  const rule: RecurrenceRuleRecord = {
     id: crypto.randomUUID(),
+    ownerScope,
     dayOfMonth,
     isActive: true,
+    createdAt: now,
+    updatedAt: now,
   };
-  store.recurrenceRules.push(rule);
+
+  await db.recurrenceRules.put(rule);
   return rule;
 }
 
@@ -24,25 +34,31 @@ export function computeNextRecurrenceDate(referenceDate: string, dayOfMonth: num
   return resolved.toISOString().slice(0, 10);
 }
 
-export function generateNextRecurrence(transaction: Transaction) {
+export async function generateNextRecurrence(transaction: TransactionRecord, ownerScope = getActiveOwnerScope()) {
   if (!transaction.recurrenceRuleId) {
     return null;
   }
 
-  const store = getStore();
-  const rule = store.recurrenceRules.find((r) => r.id === transaction.recurrenceRuleId && r.isActive);
+  assertLocalStorageAvailable();
+  const db = getDexieDb();
+  const rule = await db.recurrenceRules.get(transaction.recurrenceRuleId);
   if (!rule) {
     return null;
   }
 
-  const nextTx: Transaction = {
+  if (!rule.isActive || rule.ownerScope !== ownerScope) {
+    return null;
+  }
+
+  const nextTx: Omit<TransactionRecord, "nameNormalized" | "categoryNameNormalized" | "notesNormalized"> = {
     ...transaction,
     id: crypto.randomUUID(),
+    ownerScope,
     transactionDate: computeNextRecurrenceDate(transaction.transactionDate, rule.dayOfMonth),
     source: "recurrence_generated",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-  store.transactions.unshift(nextTx);
-  return nextTx;
+
+  return createTransaction(nextTx);
 }

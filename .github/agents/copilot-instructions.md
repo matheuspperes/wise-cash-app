@@ -1,6 +1,6 @@
 ﻿# wise-cash-app Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-23
+Auto-generated from all feature plans. Last updated: 2026-03-25
 
 ## Active Technologies
 - TypeScript 5.x, Node.js 20+ (stack atual), Python 3.11+ quando aplicavel + Next.js 15.x, React 18, npm (operacao atual), uv (padrao para Python) (002-project-ambience-uv)
@@ -25,6 +25,10 @@ Auto-generated from all feature plans. Last updated: 2026-03-23
 - N/A (UI layout/navigation refinement only) (013-refine-dashboard-transactions-layout)
 - TypeScript 5.8, React 18, Next.js 15 App Router + React Hook Form, Zod, Tailwind CSS utility classes, Next Link/navigation, existing UI primitives (`components/ui/button`, `components/ui/input`) (014-refine-transaction-form)
 - Existing app persistence paths for categories/transactions (no schema migration planned for this feature) (014-refine-transaction-form)
+- TypeScript 5.8, React 18, Next.js 15 App Router + Next Link/navigation, TanStack Query (dashboard summary), existing UI primitives (`components/ui/button`), existing header component (`components/dashboard/dashboard-header`) (015-sync-header-period)
+- N/A for new persistence; existing behavior must respect any already persisted period preference when available (015-sync-header-period)
+- TypeScript 5.8, React 18, Next.js 15 App Router + Dexie.js (IndexedDB wrapper), TanStack Query, React Hook Form, Zod (016-local-first-storage)
+- IndexedDB local-first com schema versionado (`transactions`, `recurrenceRules`, `meta`) e isolamento por bucket de usuario/anomimo (016-local-first-storage)
 
 - TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x) + Next.js, Tailwind CSS, Shadcn/UI, TanStack Query, Supabase JS, Recharts (001-monthly-finance-manager)
 
@@ -45,9 +49,9 @@ npm test; npm run lint
 TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x): Follow standard conventions
 
 ## Recent Changes
+- 016-local-first-storage: Added TypeScript 5.8, React 18, Next.js 15 App Router + Dexie.js (IndexedDB wrapper), TanStack Query, React Hook Form, Zod
+- 015-sync-header-period: Added TypeScript 5.8, React 18, Next.js 15 App Router + Next Link/navigation, TanStack Query (dashboard summary), existing UI primitives (`components/ui/button`), existing header component (`components/dashboard/dashboard-header`)
 - 014-refine-transaction-form: Added TypeScript 5.8, React 18, Next.js 15 App Router + React Hook Form, Zod, Tailwind CSS utility classes, Next Link/navigation, existing UI primitives (`components/ui/button`, `components/ui/input`)
-- 013-refine-dashboard-transactions-layout: Added TypeScript 5.8, React 18, Next.js 15 App Router + Tailwind CSS utility classes, Next Link/navigation, TanStack Query (existing dashboard summary flow), Framer Motion (existing dashboard transitions)
-- 012-refine-balance-cta-layout: Added TypeScript 5.8, React 18, Next.js 15 App Router + Tailwind CSS utility classes, Next Link/navigation, TanStack Query (dashboard data already in use)
 
 
 <!-- MANUAL ADDITIONS START -->

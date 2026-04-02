@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { formatCurrencyBRL, formatDateBR } from "@/lib/formatting/ptbr";
 import { uiText } from "@/lib/i18n/ui-text";
+import { getLocalDashboardSummary } from "@/lib/services/local-dashboard-summary";
+import { listLocalTransactions, removeLocalTransaction } from "@/lib/services/local-transactions-gateway";
+import { StorageUnavailableError } from "@/lib/storage/local-storage-health";
 import { MonthlyExpenseHistoryGroup } from "@/lib/ui/dashboard-history-types";
 import { hasActiveFilterCriteria, hasFilterStateChanged, TransactionsFilterState } from "@/lib/ui/transactions-filter-activation";
 import { parseTransactionsView, shouldResetTemporaryLaunches, TransactionsView } from "@/lib/ui/transactions-view";
@@ -36,6 +39,8 @@ export default function TransactionsPageClient() {
   const [temporaryLaunches, setTemporaryLaunches] = useState<SavedTransactionPayload[]>([]);
   const [monthlyExpenseGroups, setMonthlyExpenseGroups] = useState<MonthlyExpenseHistoryGroup[]>([]);
   const [isLoadingMonthlyHistory, setIsLoadingMonthlyHistory] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [rowActionError, setRowActionError] = useState<string | null>(null);
   const [q, setQ] = useState("");
   const [filters, setFilters] = useState<TransactionsFilterState>({});
 
@@ -45,24 +50,41 @@ export default function TransactionsPageClient() {
   const historyStyleBase = "h-10 border border-border/80 bg-surface-alt text-foreground shadow-card hover:bg-surface";
 
   const load = useCallback(async () => {
-    const query = new URLSearchParams();
-    if (q) query.set("q", q);
-    if (filters.type) query.set("type", filters.type);
-    if (filters.categoryId) query.set("categoryId", filters.categoryId);
-    if (filters.from) query.set("from", filters.from);
-    if (filters.to) query.set("to", filters.to);
+    try {
+      const response = await listLocalTransactions({
+        q: q || undefined,
+        type: filters.type,
+        categoryId: filters.categoryId,
+        from: filters.from,
+        to: filters.to,
+      });
+      setItems(response.items ?? []);
+      setHistoryError(null);
+    } catch (error) {
+      if (error instanceof StorageUnavailableError) {
+        setHistoryError("Armazenamento local indisponível. Não foi possível carregar as transações.");
+        setItems([]);
+        return;
+      }
 
-    const res = await fetch(`/api/transactions?${query.toString()}`);
-    const json = await res.json();
-    setItems(json.items ?? []);
+      setHistoryError("Não foi possível carregar as transações.");
+      setItems([]);
+    }
   }, [q, filters]);
 
   const loadMonthlyHistory = useCallback(async () => {
     setIsLoadingMonthlyHistory(true);
     try {
-      const res = await fetch("/api/dashboard/summary?months=12");
-      const json = await res.json();
+      const json = await getLocalDashboardSummary(12);
       setMonthlyExpenseGroups(json.fullTransactionsHistoryGroups ?? json.fullExpenseHistoryGroups ?? []);
+      setHistoryError(null);
+    } catch (error) {
+      if (error instanceof StorageUnavailableError) {
+        setHistoryError("Armazenamento local indisponível. Não foi possível carregar o histórico mensal.");
+      } else {
+        setHistoryError("Não foi possível carregar o histórico mensal.");
+      }
+      setMonthlyExpenseGroups([]);
     } finally {
       setIsLoadingMonthlyHistory(false);
     }
@@ -109,8 +131,26 @@ export default function TransactionsPageClient() {
     [load, loadMonthlyHistory],
   );
 
+  const handleDelete = useCallback(
+    async (id: string) => {
+      try {
+        await removeLocalTransaction(id);
+        await Promise.all([load(), loadMonthlyHistory()]);
+        setRowActionError(null);
+      } catch (error) {
+        if (error instanceof StorageUnavailableError) {
+          setRowActionError("Armazenamento local indisponível. Não foi possível excluir a transação.");
+          return;
+        }
+
+        setRowActionError("Não foi possível excluir a transação.");
+      }
+    },
+    [load, loadMonthlyHistory],
+  );
+
   const renderTransactionRows = useCallback(
-    (rows: Tx[] | SavedTransactionPayload[]) => rows.map((item) => (
+    (rows: Tx[] | SavedTransactionPayload[], showActions = false) => rows.map((item) => (
       <tr className="text-sm" key={item.id}>
         <td className="whitespace-nowrap py-2 pr-4">{formatDateBR(item.transactionDate)}</td>
         <td className="py-2 pr-4">{item.name}</td>
@@ -119,9 +159,22 @@ export default function TransactionsPageClient() {
         <td className={item.type === "income" ? "whitespace-nowrap py-2 text-right font-semibold text-emerald-400" : "whitespace-nowrap py-2 text-right font-semibold text-danger"}>
           {item.type === "income" ? "+" : "-"}{formatCurrencyBRL(item.amount)}
         </td>
+        {showActions ? (
+          <td className="whitespace-nowrap py-2 text-right">
+            <button
+              className="rounded-md border border-border/70 px-2 py-1 text-xs text-muted transition-colors hover:bg-surface-alt hover:text-foreground"
+              onClick={() => {
+                void handleDelete(item.id);
+              }}
+              type="button"
+            >
+              Excluir
+            </button>
+          </td>
+        ) : null}
       </tr>
     )),
-    [],
+    [handleDelete],
   );
 
   return (
@@ -173,6 +226,8 @@ export default function TransactionsPageClient() {
         <>
           <TransactionSearch value={q} onChange={onSearchChange} />
           <TransactionFilters value={filters} onChange={onFilterChange} />
+          {historyError ? <p className="text-sm text-danger">{historyError}</p> : null}
+          {rowActionError ? <p className="text-sm text-danger">{rowActionError}</p> : null}
           {shouldShowFilteredResults ? (
             <section className="rounded-2xl border border-border bg-surface p-5 shadow-card">
               <h2 className="mb-4 text-xl font-semibold">{uiText.filteredResultsTitle}</h2>
@@ -188,9 +243,10 @@ export default function TransactionsPageClient() {
                         <th className="py-2 pr-4 font-medium">{uiText.columnCategory}</th>
                         <th className="py-2 pr-4 font-medium">{uiText.columnType}</th>
                         <th className="py-2 text-right font-medium">{uiText.columnValue}</th>
+                        <th className="py-2 pl-4 text-right font-medium">Ações</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border/70">{renderTransactionRows(items)}</tbody>
+                    <tbody className="divide-y divide-border/70">{renderTransactionRows(items, true)}</tbody>
                   </table>
                 </div>
               )}
