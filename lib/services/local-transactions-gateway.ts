@@ -13,7 +13,7 @@ type QueryParams = {
   q?: string;
 };
 
-function mapStorageError(error: unknown) {
+function mapStorageError(error: unknown): never {
   if (error instanceof StorageUnavailableError) {
     throw error;
   }
@@ -28,7 +28,7 @@ export async function listLocalTransactions(params: QueryParams) {
     const items = await searchTransactions(params, ownerScope);
     return { items, pagination: { page: 1, pageSize: items.length, total: items.length } };
   } catch (error) {
-    mapStorageError(error);
+    return mapStorageError(error);
   }
 }
 
@@ -39,7 +39,7 @@ export async function createLocalTransaction(input: TransactionInput) {
     const transaction = await createTransactionFromInput(input, ownerScope);
     return { transaction };
   } catch (error) {
-    mapStorageError(error);
+    return mapStorageError(error);
   }
 }
 
@@ -54,7 +54,7 @@ export async function patchLocalTransaction(id: string, patch: Partial<Transacti
 
     return { transaction };
   } catch (error) {
-    mapStorageError(error);
+    return mapStorageError(error);
   }
 }
 
@@ -67,6 +67,6 @@ export async function removeLocalTransaction(id: string) {
       throw new Error("Transação não encontrada.");
     }
   } catch (error) {
-    mapStorageError(error);
+    return mapStorageError(error);
   }
 }

@@ -3,7 +3,7 @@ import { buildHistoricalTotalBalance, buildMonthlyTransactionHistoryGroups } fro
 import { StorageUnavailableError, assertLocalStorageAvailable } from "@/lib/storage/local-storage-health";
 import { getActiveOwnerScope } from "@/lib/storage/scoped-db";
 
-function mapStorageError(error: unknown) {
+function mapStorageError(error: unknown): never {
   if (error instanceof StorageUnavailableError) {
     throw error;
   }
@@ -35,6 +35,6 @@ export async function getLocalDashboardSummary(months: number) {
       areaSeries,
     };
   } catch (error) {
-    mapStorageError(error);
+    return mapStorageError(error);
   }
 }

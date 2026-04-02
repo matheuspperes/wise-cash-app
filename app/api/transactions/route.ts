@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     q: url.searchParams.get("q") ?? undefined,
   };
 
-  const items = searchTransactions(params);
+  const items = await searchTransactions(params);
   return NextResponse.json({ items, pagination: { page: 1, pageSize: items.length, total: items.length } });
 }
 
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       return badRequest("Campos da transacao invalidos", parsed.error.flatten());
     }
 
-    const transaction = createTransactionFromInput(parsed.data);
+    const transaction = await createTransactionFromInput(parsed.data);
     return NextResponse.json({ transaction }, { status: 201 });
   } catch {
     return internalError("Nao foi possivel salvar a transacao no momento.");
