@@ -7,12 +7,12 @@ export async function GET(req: NextRequest) {
   const months = Number(url.searchParams.get("months") ?? "12");
   // Legacy compatibility: ignore deprecated demo query parameter.
   url.searchParams.get("demo");
-  const summaryContext = getMonthlySummaryContext(Number.isFinite(months) ? months : 12);
+  const summaryContext = await getMonthlySummaryContext(Number.isFinite(months) ? months : 12);
   const areaSeries = summaryContext.series;
   const latest = summaryContext.latest;
   const historicalBalance = buildHistoricalTotalBalance(areaSeries);
-  const currentMonthTransactions = listCurrentMonthTransactions();
-  const fullTransactionsHistoryRows = listFullTransactionsHistoryRows();
+  const currentMonthTransactions = await listCurrentMonthTransactions();
+  const fullTransactionsHistoryRows = await listFullTransactionsHistoryRows();
   const fullTransactionsHistoryGroups = buildMonthlyTransactionHistoryGroups(fullTransactionsHistoryRows);
 
   return NextResponse.json({
