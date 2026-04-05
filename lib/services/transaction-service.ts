@@ -1,6 +1,7 @@
 import { createTransaction, findTransactionById, updateTransaction } from "@/lib/repositories/transaction-repository";
 import { TransactionRecord } from "@/lib/repositories/local-finance-contracts";
 import { createRecurrenceRule, generateNextRecurrence } from "@/lib/services/recurrence-service";
+import { correctCategoryLabel } from "@/lib/ui/category-label-corrections";
 import { normalizeAmount } from "@/lib/validation/amount-normalization";
 import { TransactionInput } from "@/lib/validation/transaction-schema";
 import { getActiveOwnerScope } from "@/lib/storage/scoped-db";
@@ -17,7 +18,7 @@ export async function createTransactionFromInput(input: TransactionInput, ownerS
     name: input.name,
     type: input.type,
     categoryId: input.categoryId,
-    categoryName: input.categoryId,
+    categoryName: correctCategoryLabel(input.categoryId),
     amount: normalizeAmount(input.amount),
     transactionDate: input.transactionDate,
     recurrenceRuleId,
@@ -51,7 +52,7 @@ export async function patchTransaction(id: string, patch: Partial<TransactionInp
   if (patch.type !== undefined) nextPatch.type = patch.type;
   if (patch.categoryId !== undefined) {
     nextPatch.categoryId = patch.categoryId;
-    nextPatch.categoryName = patch.categoryId;
+    nextPatch.categoryName = correctCategoryLabel(patch.categoryId);
   }
   if (patch.amount !== undefined) nextPatch.amount = normalizeAmount(patch.amount);
   if (patch.transactionDate !== undefined) nextPatch.transactionDate = patch.transactionDate;

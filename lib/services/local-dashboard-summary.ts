@@ -1,5 +1,6 @@
 import { getMonthlySummaryContext, listCurrentMonthTransactions, listFullTransactionsHistoryRows } from "@/lib/repositories/monthly-summary-repository";
 import { buildHistoricalTotalBalance, buildMonthlyTransactionHistoryGroups } from "@/lib/services/dashboard-history-mapper";
+import { clearLocalFunctionalData } from "@/lib/storage/dexie-db";
 import { StorageUnavailableError, assertLocalStorageAvailable } from "@/lib/storage/local-storage-health";
 import { getActiveOwnerScope } from "@/lib/storage/scoped-db";
 
@@ -34,6 +35,15 @@ export async function getLocalDashboardSummary(months: number) {
       fullExpenseHistoryGroups: fullTransactionsHistoryGroups,
       areaSeries,
     };
+  } catch (error) {
+    return mapStorageError(error);
+  }
+}
+
+export async function resetLocalFunctionalData() {
+  try {
+    assertLocalStorageAvailable();
+    await clearLocalFunctionalData();
   } catch (error) {
     return mapStorageError(error);
   }
