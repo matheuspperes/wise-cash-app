@@ -147,10 +147,10 @@ export function TransactionHistoryEditDrawer({
           </Dialog.Description>
 
           <form className="mt-4 grid gap-3" onSubmit={handleSubmit(submit)}>
-            <Input type="date" {...register("transactionDate", { required: "Data obrigatoria" })} />
+            <Input type="date" {...register("transactionDate", { required: "Data obrigatória" })} />
             {errors.transactionDate ? <p className="text-xs text-danger">{errors.transactionDate.message}</p> : null}
 
-            <Input placeholder="Descricao" {...register("description", { required: "Descricao obrigatoria" })} />
+            <Input placeholder="Descrição" {...register("description", { required: "Descrição obrigatória" })} />
             {errors.description ? <p className="text-xs text-danger">{errors.description.message}</p> : null}
 
             <Select
