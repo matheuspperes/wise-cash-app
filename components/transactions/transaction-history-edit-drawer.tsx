@@ -143,7 +143,7 @@ export function TransactionHistoryEditDrawer({
         <Dialog.Content className="fixed right-0 top-0 z-50 h-full w-full max-w-md overflow-y-auto border-l border-border bg-surface p-5 shadow-card">
           <Dialog.Title className="text-lg font-semibold">Editar transação</Dialog.Title>
           <Dialog.Description className="mt-1 text-sm text-muted">
-            Ajuste os dados do lancamento e salve para atualizar historico e dashboard.
+            Ajuste os dados do lançamento e salve para atualizar histórico e dashboard.
           </Dialog.Description>
 
           <form className="mt-4 grid gap-3" onSubmit={handleSubmit(submit)}>
