@@ -141,7 +141,7 @@ export function TransactionHistoryEditDrawer({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
         <Dialog.Content className="fixed right-0 top-0 z-50 h-full w-full max-w-md overflow-y-auto border-l border-border bg-surface p-5 shadow-card">
-          <Dialog.Title className="text-lg font-semibold">Editar transacao</Dialog.Title>
+          <Dialog.Title className="text-lg font-semibold">Editar transação</Dialog.Title>
           <Dialog.Description className="mt-1 text-sm text-muted">
             Ajuste os dados do lancamento e salve para atualizar historico e dashboard.
           </Dialog.Description>
