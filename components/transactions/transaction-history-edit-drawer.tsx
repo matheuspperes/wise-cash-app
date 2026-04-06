@@ -38,11 +38,36 @@ type Props = {
 };
 
 function amountToInputValue(value: number) {
-  return String(value);
+  return new Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
 }
 
 function parseAmount(input: string) {
-  return Number(input.replace(",", "."));
+  const normalized = input.trim();
+
+  if (!normalized) {
+    return NaN;
+  }
+
+  const sanitized = normalized.replace(/[^\d.,-]/g, "");
+  const lastComma = sanitized.lastIndexOf(",");
+  const lastDot = sanitized.lastIndexOf(".");
+  const decimalSeparatorIndex = Math.max(lastComma, lastDot);
+
+  if (decimalSeparatorIndex === -1) {
+    return Number(sanitized.replace(/[^\d-]/g, ""));
+  }
+
+  const integerPart = sanitized
+    .slice(0, decimalSeparatorIndex)
+    .replace(/[^\d-]/g, "");
+  const decimalPart = sanitized
+    .slice(decimalSeparatorIndex + 1)
+    .replace(/[^\d]/g, "");
+
+  return Number(`${integerPart}.${decimalPart}`);
 }
 
 export function TransactionHistoryEditDrawer({
