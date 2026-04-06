@@ -16,7 +16,7 @@ export type MonthlySummaryContext = {
   latest: MonthlyPoint;
 };
 
-export async function getMonthlySummary(months = 12, ownerScope?: string) {
+export async function getMonthlySummary(months: number | null = 12, ownerScope?: string) {
   const txs = await listTransactions({}, ownerScope);
   const bucket = new Map<string, MonthlyPoint>();
 
@@ -35,14 +35,14 @@ export async function getMonthlySummary(months = 12, ownerScope?: string) {
     ref.net = ref.income - ref.expense;
   }
 
-  const realSeries = Array.from(bucket.values())
-    .sort((a, b) => (a.monthRef > b.monthRef ? 1 : -1))
-    .slice(-months);
+  const sortedSeries = Array.from(bucket.values()).sort((a, b) => (a.monthRef > b.monthRef ? 1 : -1));
+  const safeMonths = typeof months === "number" ? Math.max(1, Math.floor(months)) : null;
+  const realSeries = typeof safeMonths === "number" ? sortedSeries.slice(-safeMonths) : sortedSeries;
 
   return realSeries.map((point) => ({ ...point, month: formatMonthYearLabel(point.monthRef) }));
 }
 
-export async function getMonthlySummaryContext(months = 12, ownerScope?: string): Promise<MonthlySummaryContext> {
+export async function getMonthlySummaryContext(months: number | null = 12, ownerScope?: string): Promise<MonthlySummaryContext> {
   const series = await getMonthlySummary(months, ownerScope);
   const latest = series[series.length - 1] ?? { monthRef: "", month: "", income: 0, expense: 0, net: 0 };
 

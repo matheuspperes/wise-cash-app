@@ -10,9 +10,11 @@ import { NetBalanceCard } from "@/components/dashboard/net-balance-card";
 import { RecurrencePendingConfirmationsList } from "@/components/dashboard/recurrence-pending-confirmations-list";
 import { Button } from "@/components/ui/button";
 import { uiText } from "@/lib/i18n/ui-text";
+import { getNetBalanceLabelByMode } from "@/lib/services/dashboard-net-balance-label";
 import { getLocalDashboardSummary, resetLocalFunctionalData } from "@/lib/services/local-dashboard-summary";
 import { cancelLocalRecurrencePending, confirmLocalRecurrencePending } from "@/lib/services/local-transactions-gateway";
 import { StorageUnavailableError } from "@/lib/storage/local-storage-health";
+import { DASHBOARD_VIEW_MODE_DEFAULT, DashboardViewMode } from "@/lib/ui/dashboard-view-mode";
 import { resolveDashboardInitialMonths } from "@/lib/ui/dashboard-period-default";
 import { CurrentMonthTransactionRow, HistoricalTotalBalance, MonthlyExpenseHistoryGroup, RecurrencePendingConfirmationRow } from "@/lib/ui/dashboard-history-types";
 import { getVisualDataState } from "@/lib/ui/data-state";
@@ -36,16 +38,17 @@ type Summary = {
 
 export function DashboardPageClient() {
   const [months, setMonths] = useState(3);
+  const [viewMode, setViewMode] = useState<DashboardViewMode>(DASHBOARD_VIEW_MODE_DEFAULT);
   const [isResetting, setIsResetting] = useState(false);
   const [isMutatingPending, setIsMutatingPending] = useState(false);
   const [resetMessage, setResetMessage] = useState<string | null>(null);
   const [resetError, setResetError] = useState<string | null>(null);
 
   const query = useQuery<Summary>({
-    queryKey: ["dashboard-summary", months],
+    queryKey: ["dashboard-summary", months, viewMode],
     queryFn: async () => {
       try {
-        return await getLocalDashboardSummary(months);
+        return await getLocalDashboardSummary(months, viewMode);
       } catch (error) {
         if (error instanceof StorageUnavailableError) {
           throw new Error("Armazenamento local indisponível. Verifique as permissões do navegador.");
@@ -55,6 +58,9 @@ export function DashboardPageClient() {
       }
     },
   });
+
+  const secondaryBalanceLabel = useMemo(() => getNetBalanceLabelByMode(viewMode), [viewMode]);
+  const chartTitle = useMemo(() => (viewMode === "previsoes" ? "Previsões mensais" : uiText.chartHistorical), [viewMode]);
 
   const visualState = getVisualDataState({
     isLoading: query.isLoading,
@@ -193,10 +199,18 @@ export function DashboardPageClient() {
         >
           <div className="grid items-stretch gap-4 md:grid-cols-2">
             <NetBalanceCard isFetching={query.isFetching} value={summary.netBalance} />
-            <HistoricalTotalBalanceCard balance={summary.historicalBalance} isFetching={query.isFetching} />
+            <HistoricalTotalBalanceCard balance={summary.historicalBalance} isFetching={query.isFetching} label={secondaryBalanceLabel} />
           </div>
           <div className="-mt-1">
-            <AreaHistoryChart data={summary.areaSeries} isFetching={query.isFetching} months={months} onMonthsChange={setMonths} />
+            <AreaHistoryChart
+              data={summary.areaSeries}
+              isFetching={query.isFetching}
+              months={months}
+              onMonthsChange={setMonths}
+              onViewModeChange={setViewMode}
+              title={chartTitle}
+              viewMode={viewMode}
+            />
           </div>
           <RecurrencePendingConfirmationsList
             isSubmitting={isMutatingPending}

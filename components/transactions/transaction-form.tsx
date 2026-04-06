@@ -2,14 +2,16 @@
 
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
+import { SimpleTooltip } from "@/components/ui/simple-tooltip";
 import { extractDigits, formatBrlFromDigits, parseBrlDisplayToAmount } from "@/lib/formatting/brl-currency-mask";
 import { uiText } from "@/lib/i18n/ui-text";
 import { createLocalTransaction } from "@/lib/services/local-transactions-gateway";
 import { StorageUnavailableError } from "@/lib/storage/local-storage-health";
 import { hasDuplicateNormalizedCategory } from "@/lib/ui/category-normalization";
+import { RECURRENCE_MODE_TOOLTIP_LINES, RECURRENCE_TYPE_TOOLTIP_LINES } from "@/lib/ui/recurrence-tooltip-content";
 import { getCategoryPresetsByType, TransactionType } from "@/lib/ui/transaction-category-presets";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo, useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -72,6 +74,23 @@ type CustomCategoriesByType = Record<TransactionType, string[]>;
 
 function mergeAndSortCategories(preset: readonly string[], custom: readonly string[]) {
   return Array.from(new Set([...preset, ...custom])).sort((left, right) => left.localeCompare(right, "pt-BR"));
+}
+
+function RecurrenceField({
+  tooltipLabel,
+  tooltipLines,
+  children,
+}: {
+  tooltipLabel: string;
+  tooltipLines: readonly string[];
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className="min-w-0 flex-1">{children}</div>
+      <SimpleTooltip className="shrink-0" label={tooltipLabel} lines={tooltipLines} size="compact" />
+    </div>
+  );
 }
 
 export function TransactionForm({ onSaved }: Props) {
@@ -360,7 +379,10 @@ export function TransactionForm({ onSaved }: Props) {
 
         <div className="md:col-span-2 rounded-xl border border-border bg-surface-alt/40 p-3">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-sm font-semibold">Recorrência</p>
+            <div>
+              <p className="text-sm font-semibold">Recorrência</p>
+              <p className="text-xs text-muted">Ative para repetir este lançamento mensalmente.</p>
+            </div>
             <Controller
               control={control}
               name="recurrenceEnabled"
@@ -380,7 +402,7 @@ export function TransactionForm({ onSaved }: Props) {
                   type="button"
                   variant={field.value ? "primary" : "secondary"}
                 >
-                  {field.value ? "Ativada" : "Ativar"}
+                  {field.value ? "Recorrência: Ligada" : "Recorrência: Desligada"}
                 </Button>
               )}
             />
@@ -410,29 +432,35 @@ export function TransactionForm({ onSaved }: Props) {
               </div>
 
               <div>
-                <Controller
-                  control={control}
-                  name="recurrenceType"
-                  render={({ field }) => (
-                    <Select
-                      onChange={(event) => {
-                        const nextType = event.target.value as "limited" | "unlimited";
-                        field.onChange(nextType);
-                        if (nextType === "limited") {
-                          setValue("recurrenceUnlimitedMode", undefined, { shouldValidate: true });
-                        }
-                        if (nextType === "unlimited") {
-                          setValue("recurrenceMaxCycles", undefined, { shouldValidate: true });
-                        }
-                      }}
-                      value={field.value ?? ""}
-                    >
-                      <option value="">Tipo de recorrência</option>
-                      <option value="limited">Limitada</option>
-                      <option value="unlimited">Ilimitada</option>
-                    </Select>
-                  )}
-                />
+                <RecurrenceField
+                  tooltipLabel="Explicação do tipo de recorrência"
+                  tooltipLines={RECURRENCE_TYPE_TOOLTIP_LINES}
+                >
+                  <Controller
+                    control={control}
+                    name="recurrenceType"
+                    render={({ field }) => (
+                      <Select
+                        className="w-full min-w-0 flex-1 md:max-w-[14rem]"
+                        onChange={(event) => {
+                          const nextType = event.target.value as "limited" | "unlimited";
+                          field.onChange(nextType);
+                          if (nextType === "limited") {
+                            setValue("recurrenceUnlimitedMode", undefined, { shouldValidate: true });
+                          }
+                          if (nextType === "unlimited") {
+                            setValue("recurrenceMaxCycles", undefined, { shouldValidate: true });
+                          }
+                        }}
+                        value={field.value ?? ""}
+                      >
+                        <option value="">Tipo de recorrência</option>
+                        <option value="limited">Limitada</option>
+                        <option value="unlimited">Ilimitada</option>
+                      </Select>
+                    )}
+                  />
+                </RecurrenceField>
                 {errors.recurrenceType ? <p className="mt-1 text-xs text-danger">{errors.recurrenceType.message}</p> : null}
               </div>
 
@@ -460,17 +488,22 @@ export function TransactionForm({ onSaved }: Props) {
 
               {recurrenceType === "unlimited" ? (
                 <div>
-                  <Controller
-                    control={control}
-                    name="recurrenceUnlimitedMode"
-                    render={({ field }) => (
-                      <Select onChange={(event) => field.onChange(event.target.value)} value={field.value ?? ""}>
-                        <option value="">Modo da recorrência</option>
-                        <option value="automatic">Automática</option>
-                        <option value="manual">Manual</option>
-                      </Select>
-                    )}
-                  />
+                  <RecurrenceField
+                    tooltipLabel="Explicação do modo de recorrência"
+                    tooltipLines={RECURRENCE_MODE_TOOLTIP_LINES}
+                  >
+                    <Controller
+                      control={control}
+                      name="recurrenceUnlimitedMode"
+                      render={({ field }) => (
+                        <Select className="w-full min-w-0 flex-1 md:max-w-[14rem]" onChange={(event) => field.onChange(event.target.value)} value={field.value ?? ""}>
+                          <option value="">Modo da recorrência</option>
+                          <option value="automatic">Automática</option>
+                          <option value="manual">Manual</option>
+                        </Select>
+                      )}
+                    />
+                  </RecurrenceField>
                   {errors.recurrenceUnlimitedMode ? <p className="mt-1 text-xs text-danger">{errors.recurrenceUnlimitedMode.message}</p> : null}
                 </div>
               ) : null}

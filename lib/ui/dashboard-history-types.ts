@@ -6,6 +6,11 @@ export type HistoricalTotalBalance = {
   netTotal: number;
 };
 
+export type SecondaryBalanceCardContext = {
+  label: string;
+  value: number;
+};
+
 export type HistoryTransactionType = "income" | "expense";
 
 export type CurrentMonthTransactionRow = {
