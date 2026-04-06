@@ -1,5 +1,6 @@
 import { formatCurrencyBRL, formatDateBR } from "@/lib/formatting/ptbr";
 import { uiText } from "@/lib/i18n/ui-text";
+import { correctCategoryLabel } from "@/lib/ui/category-label-corrections";
 import { CurrentMonthTransactionRow } from "@/lib/ui/dashboard-history-types";
 import { cn } from "@/lib/utils";
 
@@ -37,7 +38,7 @@ export function CurrentMonthExpensesTable({ rows, isFetching = false }: Props) {
                 <tr key={`${row.date}-${row.description}-${index}`}>
                   <td className="whitespace-nowrap py-2 pr-4">{formatDateBR(row.date)}</td>
                   <td className="py-2 pr-4">{row.description}</td>
-                  <td className="py-2 pr-4">{row.category}</td>
+                  <td className="py-2 pr-4">{correctCategoryLabel(row.category)}</td>
                   <td className="py-2 pr-4">{row.type === "income" ? uiText.typeIncome : uiText.typeExpense}</td>
                   <td className={cn("whitespace-nowrap py-2 text-right font-semibold", row.type === "income" ? "text-emerald-400" : "text-danger")}>
                     {row.type === "income" ? "+" : "-"}

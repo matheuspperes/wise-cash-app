@@ -56,11 +56,13 @@ export async function listFullTransactionsHistoryRows(ownerScope?: string): Prom
   return (await listTransactions({}, ownerScope))
     .sort((a, b) => (a.transactionDate < b.transactionDate ? 1 : -1))
     .map((tx) => ({
+      id: tx.id,
       date: tx.transactionDate,
       description: tx.name,
       category: tx.categoryName,
       type: tx.type,
       amount: tx.amount,
+      notes: tx.notes,
     }));
 }
 

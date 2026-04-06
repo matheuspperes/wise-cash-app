@@ -31,3 +31,12 @@ export function getDexieDb() {
 
   return globalDexie.__wiseCashDexie;
 }
+
+export async function clearLocalFunctionalData() {
+  const db = getDexieDb();
+  await db.transaction("rw", [db.transactions, db.recurrenceRules, db.meta], async () => {
+    await db.transactions.clear();
+    await db.recurrenceRules.clear();
+    await db.meta.clear();
+  });
+}

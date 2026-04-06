@@ -1,6 +1,7 @@
 import { MonthlyPoint } from "@/lib/repositories/monthly-summary-repository";
 import { groupMonthlyTransactionHistory } from "@/lib/services/monthly-expense-history";
 import { TransactionRecord } from "@/lib/repositories/local-finance-contracts";
+import { correctCategoryLabel } from "@/lib/ui/category-label-corrections";
 import { CurrentMonthTransactionRow, HistoricalTotalBalance, MonthlyExpenseHistoryGroup, MonthlyExpenseHistoryRow, MonthlyTransactionHistoryGroup, MonthlyTransactionHistoryRow } from "@/lib/ui/dashboard-history-types";
 
 export function buildHistoricalTotalBalance(series: MonthlyPoint[]): HistoricalTotalBalance {
@@ -39,7 +40,7 @@ export function mapTransactionToCurrentMonthRow(tx: TransactionRecord): CurrentM
   return {
     date: tx.transactionDate,
     description: tx.name,
-    category: tx.categoryName,
+    category: correctCategoryLabel(tx.categoryName || tx.categoryId),
     type: tx.type,
     value: tx.amount,
   };

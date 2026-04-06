@@ -1,5 +1,6 @@
 import { TransactionListParams, TransactionRecord } from "@/lib/repositories/local-finance-contracts";
 import { normalizeTextForSearch } from "@/lib/repositories/text-normalization";
+import { categoryMatchesFilter, correctCategoryLabel } from "@/lib/ui/category-label-corrections";
 import Dexie from "dexie";
 import { getDexieDb } from "@/lib/storage/dexie-db";
 import { assertLocalStorageAvailable } from "@/lib/storage/local-storage-health";
@@ -7,6 +8,15 @@ import { getActiveOwnerScope } from "@/lib/storage/scoped-db";
 
 function byDateDesc(left: TransactionRecord, right: TransactionRecord) {
   return left.transactionDate < right.transactionDate ? 1 : -1;
+}
+
+function withCorrectedCategory(record: TransactionRecord): TransactionRecord {
+  const correctedCategory = correctCategoryLabel(record.categoryName || record.categoryId);
+  return {
+    ...record,
+    categoryName: correctedCategory,
+    categoryNameNormalized: normalizeTextForSearch(correctedCategory),
+  };
 }
 
 export async function listTransactions(params: TransactionListParams = {}, ownerScope = getActiveOwnerScope()) {
@@ -18,8 +28,9 @@ export async function listTransactions(params: TransactionListParams = {}, owner
     .toArray();
 
   return items
+    .map(withCorrectedCategory)
     .filter((tx) => (params.type ? tx.type === params.type : true))
-    .filter((tx) => (params.categoryId ? tx.categoryId === params.categoryId : true))
+    .filter((tx) => (params.categoryId ? categoryMatchesFilter(tx.categoryId, tx.categoryName, params.categoryId) : true))
     .filter((tx) => (params.from ? tx.transactionDate >= params.from : true))
     .filter((tx) => (params.to ? tx.transactionDate <= params.to : true))
     .sort(byDateDesc);
@@ -29,10 +40,12 @@ export async function createTransaction(tx: Omit<TransactionRecord, "nameNormali
   assertLocalStorageAvailable();
   const db = getDexieDb();
 
+  const correctedCategory = correctCategoryLabel(tx.categoryName || tx.categoryId);
   const record: TransactionRecord = {
     ...tx,
+    categoryName: correctedCategory,
     nameNormalized: normalizeTextForSearch(tx.name),
-    categoryNameNormalized: normalizeTextForSearch(tx.categoryName),
+    categoryNameNormalized: normalizeTextForSearch(correctedCategory),
     notesNormalized: normalizeTextForSearch(tx.notes),
   };
 
@@ -64,6 +77,8 @@ export async function updateTransaction(id: string, patch: Partial<TransactionRe
     ...patch,
     updatedAt: new Date().toISOString(),
   };
+
+  next.categoryName = correctCategoryLabel(next.categoryName || next.categoryId);
 
   next.nameNormalized = normalizeTextForSearch(next.name);
   next.categoryNameNormalized = normalizeTextForSearch(next.categoryName);

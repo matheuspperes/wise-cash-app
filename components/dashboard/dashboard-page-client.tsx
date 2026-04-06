@@ -9,7 +9,7 @@ import { HistoricalTotalBalanceCard } from "@/components/dashboard/historical-to
 import { NetBalanceCard } from "@/components/dashboard/net-balance-card";
 import { Button } from "@/components/ui/button";
 import { uiText } from "@/lib/i18n/ui-text";
-import { getLocalDashboardSummary } from "@/lib/services/local-dashboard-summary";
+import { getLocalDashboardSummary, resetLocalFunctionalData } from "@/lib/services/local-dashboard-summary";
 import { StorageUnavailableError } from "@/lib/storage/local-storage-health";
 import { resolveDashboardInitialMonths } from "@/lib/ui/dashboard-period-default";
 import { CurrentMonthTransactionRow, HistoricalTotalBalance, MonthlyExpenseHistoryGroup } from "@/lib/ui/dashboard-history-types";
@@ -17,7 +17,7 @@ import { getVisualDataState } from "@/lib/ui/data-state";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Summary = {
   currentMonth: string;
@@ -32,7 +32,10 @@ type Summary = {
 };
 
 export function DashboardPageClient() {
-  const [months, setMonths] = useState(() => resolveDashboardInitialMonths());
+  const [months, setMonths] = useState(3);
+  const [isResetting, setIsResetting] = useState(false);
+  const [resetMessage, setResetMessage] = useState<string | null>(null);
+  const [resetError, setResetError] = useState<string | null>(null);
 
   const query = useQuery<Summary>({
     queryKey: ["dashboard-summary", months],
@@ -72,6 +75,63 @@ export function DashboardPageClient() {
   const transactionsHistoryHref = useMemo(() => "/transactions?view=history", []);
   const transactionsCreateHref = useMemo(() => "/transactions?view=new", []);
   const ctaPaddingClasses = "h-10 px-4 py-2 text-sm";
+
+  useEffect(() => {
+    // Keep first SSR/client render deterministic; apply persisted preference after mount.
+    const persistedMonths = resolveDashboardInitialMonths();
+    setMonths((current) => (current === persistedMonths ? current : persistedMonths));
+  }, []);
+
+  useEffect(() => {
+    const onTransactionsMutated = () => {
+      void query.refetch();
+    };
+
+    window.addEventListener("wisecash:transactions-mutated", onTransactionsMutated);
+    return () => {
+      window.removeEventListener("wisecash:transactions-mutated", onTransactionsMutated);
+    };
+  }, [query]);
+
+  useEffect(() => {
+    if (!resetMessage) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setResetMessage(null);
+    }, 3000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [resetMessage]);
+
+  const handleFullReset = async () => {
+    const confirmed = window.confirm("Remover todos os dados locais da aplicação (usuário e anônimo)?");
+    if (!confirmed) {
+      return;
+    }
+
+    setIsResetting(true);
+    setResetMessage(null);
+    setResetError(null);
+
+    try {
+      await resetLocalFunctionalData();
+      await query.refetch();
+      setResetMessage(`Dados locais removidos com sucesso.`);
+      window.dispatchEvent(new Event("wisecash:local-reset"));
+    } catch (error) {
+      if (error instanceof StorageUnavailableError) {
+        setResetError("Armazenamento local indisponível. Verifique as permissões do navegador.");
+      } else {
+        setResetError("Não foi possível remover os dados locais. Tente novamente.");
+      }
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   return (
     <main className="mx-auto flex max-w-[76.8rem] flex-col gap-5 px-5 pb-28 pt-5 md:pb-5">
@@ -114,6 +174,28 @@ export function DashboardPageClient() {
           <CurrentMonthExpensesTable isFetching={query.isFetching} rows={summary.currentMonthTransactions} />
         </motion.div>
       ) : null}
+
+      <section className="rounded-2xl border border-border bg-surface p-4 shadow-card">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="text-base font-semibold">Limpeza de dados locais</h2>
+            <p className="text-sm text-muted">Remove transações, recorrências e metadados em todos os escopos locais.</p>
+          </div>
+          <Button
+            className="h-10 bg-danger px-4 text-sm text-white hover:brightness-110"
+            disabled={isResetting}
+            onClick={() => {
+              void handleFullReset();
+            }}
+            size="md"
+            type="button"
+          >
+            {isResetting ? "Limpando..." : "Limpar dados locais"}
+          </Button>
+        </div>
+        {resetMessage ? <p className="mt-2 text-sm text-emerald-400">{resetMessage}</p> : null}
+        {resetError ? <p className="mt-2 text-sm text-danger">{resetError}</p> : null}
+      </section>
     </main>
   );
 }

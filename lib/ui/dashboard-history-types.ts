@@ -20,11 +20,13 @@ export type CurrentMonthTransactionRow = {
 export type CurrentMonthExpenseRow = CurrentMonthTransactionRow;
 
 export type MonthlyTransactionHistoryRow = {
+  id: string;
   date: string;
   description: string;
   category: string;
   type: HistoryTransactionType;
   amount: number;
+  notes?: string;
 };
 
 export type MonthlyTransactionHistoryGroup = {

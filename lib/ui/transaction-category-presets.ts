@@ -4,24 +4,24 @@ export const expenseCategoryPresets = [
   "Carro",
   "Casa",
   "Comida",
-  "Educacao",
+  "Educação",
   "Mercado",
   "Outros",
-  "Recreacao",
+  "Recreação",
   "Roupa",
-  "Saude",
-  "Servicos",
+  "Saúde",
+  "Serviços",
   "Taxas",
-  "Transferencias",
+  "Transferências",
   "Transporte",
 ] as const;
 
 export const incomeCategoryPresets = [
-  "Bonus",
+  "Bônus",
   "Investimento",
   "Outros",
   "Presente",
-  "Salario",
+  "Salário",
   "Vale",
 ] as const;
 

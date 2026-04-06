@@ -1,5 +1,6 @@
 import { softDeleteTransaction } from "@/lib/repositories/transaction-repository";
 import { searchTransactions } from "@/lib/repositories/transaction-search";
+import { getLocalDashboardSummary } from "@/lib/services/local-dashboard-summary";
 import { StorageUnavailableError, assertLocalStorageAvailable } from "@/lib/storage/local-storage-health";
 import { getActiveOwnerScope } from "@/lib/storage/scoped-db";
 import { patchTransaction, createTransactionFromInput } from "@/lib/services/transaction-service";
@@ -66,7 +67,21 @@ export async function removeLocalTransaction(id: string) {
     if (!deleted) {
       throw new Error("Transação não encontrada.");
     }
+
+    return { transaction: deleted };
   } catch (error) {
     return mapStorageError(error);
   }
+}
+
+export async function loadLocalFinanceViews(params: QueryParams, months = 12) {
+  const [transactions, summary] = await Promise.all([
+    listLocalTransactions(params),
+    getLocalDashboardSummary(months),
+  ]);
+
+  return {
+    transactions,
+    summary,
+  };
 }
