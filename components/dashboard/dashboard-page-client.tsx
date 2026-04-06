@@ -7,12 +7,14 @@ import { AreaHistoryChart } from "@/components/dashboard/area-history-chart";
 import { CurrentMonthExpensesTable } from "@/components/dashboard/current-month-expenses-table";
 import { HistoricalTotalBalanceCard } from "@/components/dashboard/historical-total-balance-card";
 import { NetBalanceCard } from "@/components/dashboard/net-balance-card";
+import { RecurrencePendingConfirmationsList } from "@/components/dashboard/recurrence-pending-confirmations-list";
 import { Button } from "@/components/ui/button";
 import { uiText } from "@/lib/i18n/ui-text";
 import { getLocalDashboardSummary, resetLocalFunctionalData } from "@/lib/services/local-dashboard-summary";
+import { cancelLocalRecurrencePending, confirmLocalRecurrencePending } from "@/lib/services/local-transactions-gateway";
 import { StorageUnavailableError } from "@/lib/storage/local-storage-health";
 import { resolveDashboardInitialMonths } from "@/lib/ui/dashboard-period-default";
-import { CurrentMonthTransactionRow, HistoricalTotalBalance, MonthlyExpenseHistoryGroup } from "@/lib/ui/dashboard-history-types";
+import { CurrentMonthTransactionRow, HistoricalTotalBalance, MonthlyExpenseHistoryGroup, RecurrencePendingConfirmationRow } from "@/lib/ui/dashboard-history-types";
 import { getVisualDataState } from "@/lib/ui/data-state";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -28,12 +30,14 @@ type Summary = {
   currentMonthExpenses?: CurrentMonthTransactionRow[];
   fullTransactionsHistoryGroups?: MonthlyExpenseHistoryGroup[];
   fullExpenseHistoryGroups?: MonthlyExpenseHistoryGroup[];
+  recurrencePendingConfirmations?: RecurrencePendingConfirmationRow[];
   totals?: { income: number; expense: number };
 };
 
 export function DashboardPageClient() {
   const [months, setMonths] = useState(3);
   const [isResetting, setIsResetting] = useState(false);
+  const [isMutatingPending, setIsMutatingPending] = useState(false);
   const [resetMessage, setResetMessage] = useState<string | null>(null);
   const [resetError, setResetError] = useState<string | null>(null);
 
@@ -67,6 +71,7 @@ export function DashboardPageClient() {
         areaSeries: [],
         historicalBalance: { periodStart: "", periodEnd: "", totalIncome: 0, totalExpense: 0, netTotal: 0 },
         currentMonthTransactions: [],
+        recurrencePendingConfirmations: [],
         totals: { income: 0, expense: 0 },
       },
     [query.data],
@@ -133,6 +138,28 @@ export function DashboardPageClient() {
     }
   };
 
+  const handleConfirmPending = async (id: string) => {
+    setIsMutatingPending(true);
+    try {
+      await confirmLocalRecurrencePending(id);
+      await query.refetch();
+      window.dispatchEvent(new Event("wisecash:transactions-mutated"));
+    } finally {
+      setIsMutatingPending(false);
+    }
+  };
+
+  const handleCancelPending = async (id: string) => {
+    setIsMutatingPending(true);
+    try {
+      await cancelLocalRecurrencePending(id);
+      await query.refetch();
+      window.dispatchEvent(new Event("wisecash:transactions-mutated"));
+    } finally {
+      setIsMutatingPending(false);
+    }
+  };
+
   return (
     <main className="mx-auto flex max-w-[76.8rem] flex-col gap-5 px-5 pb-28 pt-5 md:pb-5">
       <DashboardHeader
@@ -171,6 +198,12 @@ export function DashboardPageClient() {
           <div className="-mt-1">
             <AreaHistoryChart data={summary.areaSeries} isFetching={query.isFetching} months={months} onMonthsChange={setMonths} />
           </div>
+          <RecurrencePendingConfirmationsList
+            isSubmitting={isMutatingPending}
+            items={summary.recurrencePendingConfirmations ?? []}
+            onCancel={handleCancelPending}
+            onConfirm={handleConfirmPending}
+          />
           <CurrentMonthExpensesTable isFetching={query.isFetching} rows={summary.currentMonthTransactions} />
         </motion.div>
       ) : null}

@@ -1,5 +1,11 @@
 export type TxType = "income" | "expense";
 
+export type RecurrenceType = "limited" | "unlimited";
+
+export type RecurrenceUnlimitedMode = "automatic" | "manual";
+
+export type RecurrenceInstanceStatus = "pending" | "confirmed" | "canceled";
+
 export type OwnerScope = string;
 
 export type TransactionRecord = {
@@ -26,7 +32,38 @@ export type RecurrenceRuleRecord = {
   id: string;
   ownerScope: OwnerScope;
   dayOfMonth: number;
+  recurrenceType: RecurrenceType;
+  unlimitedMode: RecurrenceUnlimitedMode | null;
+  maxCycles: number | null;
+  generatedCycles: number;
+  lastProcessedMonthRef: string | null;
+  projectionUntilMonthRef: string | null;
+  templateName: string;
+  templateType: TxType;
+  templateCategoryId: string;
+  templateCategoryName: string;
+  templateAmount: number;
+  templateNotes?: string;
+  startDate: string;
   isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type RecurrenceInstanceRecord = {
+  id: string;
+  ownerScope: OwnerScope;
+  recurrenceRuleId: string;
+  monthRef: string;
+  status: RecurrenceInstanceStatus;
+  dueDate: string;
+  snapshotName: string;
+  snapshotType: TxType;
+  snapshotCategoryId: string;
+  snapshotCategoryName: string;
+  snapshotAmount: number;
+  snapshotNotes?: string;
+  transactionId: string | null;
   createdAt: string;
   updatedAt: string;
 };

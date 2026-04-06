@@ -1,6 +1,7 @@
 import { softDeleteTransaction } from "@/lib/repositories/transaction-repository";
 import { searchTransactions } from "@/lib/repositories/transaction-search";
-import { getLocalDashboardSummary } from "@/lib/services/local-dashboard-summary";
+import { getLocalDashboardSummary, reconcileAfterRecurrenceMutation } from "@/lib/services/local-dashboard-summary";
+import { cancelPendingRecurrenceInstance, confirmPendingRecurrenceInstance, listPendingRecurrenceInstances } from "@/lib/services/recurrence-service";
 import { StorageUnavailableError, assertLocalStorageAvailable } from "@/lib/storage/local-storage-health";
 import { getActiveOwnerScope } from "@/lib/storage/scoped-db";
 import { patchTransaction, createTransactionFromInput } from "@/lib/services/transaction-service";
@@ -38,6 +39,7 @@ export async function createLocalTransaction(input: TransactionInput) {
     assertLocalStorageAvailable();
     const ownerScope = getActiveOwnerScope();
     const transaction = await createTransactionFromInput(input, ownerScope);
+    await reconcileAfterRecurrenceMutation(ownerScope);
     return { transaction };
   } catch (error) {
     return mapStorageError(error);
@@ -53,6 +55,8 @@ export async function patchLocalTransaction(id: string, patch: Partial<Transacti
       throw new Error("Transação não encontrada.");
     }
 
+    await reconcileAfterRecurrenceMutation(ownerScope);
+
     return { transaction };
   } catch (error) {
     return mapStorageError(error);
@@ -67,6 +71,8 @@ export async function removeLocalTransaction(id: string) {
     if (!deleted) {
       throw new Error("Transação não encontrada.");
     }
+
+    await reconcileAfterRecurrenceMutation(ownerScope);
 
     return { transaction: deleted };
   } catch (error) {
@@ -84,4 +90,40 @@ export async function loadLocalFinanceViews(params: QueryParams, months = 12) {
     transactions,
     summary,
   };
+}
+
+export async function listLocalRecurrencePendingConfirmations() {
+  try {
+    assertLocalStorageAvailable();
+    const ownerScope = getActiveOwnerScope();
+    await reconcileAfterRecurrenceMutation(ownerScope);
+    const items = await listPendingRecurrenceInstances(ownerScope);
+    return { items };
+  } catch (error) {
+    return mapStorageError(error);
+  }
+}
+
+export async function confirmLocalRecurrencePending(id: string) {
+  try {
+    assertLocalStorageAvailable();
+    const ownerScope = getActiveOwnerScope();
+    const instance = await confirmPendingRecurrenceInstance(id, ownerScope);
+    await reconcileAfterRecurrenceMutation(ownerScope);
+    return { instance };
+  } catch (error) {
+    return mapStorageError(error);
+  }
+}
+
+export async function cancelLocalRecurrencePending(id: string) {
+  try {
+    assertLocalStorageAvailable();
+    const ownerScope = getActiveOwnerScope();
+    const instance = await cancelPendingRecurrenceInstance(id, ownerScope);
+    await reconcileAfterRecurrenceMutation(ownerScope);
+    return { instance };
+  } catch (error) {
+    return mapStorageError(error);
+  }
 }

@@ -63,6 +63,8 @@ export async function listFullTransactionsHistoryRows(ownerScope?: string): Prom
       type: tx.type,
       amount: tx.amount,
       notes: tx.notes,
+      source: tx.source,
+      recurrenceRuleId: tx.recurrenceRuleId,
     }));
 }
 

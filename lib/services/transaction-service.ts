@@ -1,15 +1,37 @@
 import { createTransaction, findTransactionById, updateTransaction } from "@/lib/repositories/transaction-repository";
 import { TransactionRecord } from "@/lib/repositories/local-finance-contracts";
-import { createRecurrenceRule, generateNextRecurrence } from "@/lib/services/recurrence-service";
+import { createRecurrenceRule, reconcileRecurrence } from "@/lib/services/recurrence-service";
 import { correctCategoryLabel } from "@/lib/ui/category-label-corrections";
 import { normalizeAmount } from "@/lib/validation/amount-normalization";
 import { TransactionInput } from "@/lib/validation/transaction-schema";
 import { getActiveOwnerScope } from "@/lib/storage/scoped-db";
 
 export async function createTransactionFromInput(input: TransactionInput, ownerScope = getActiveOwnerScope()) {
+  const correctedCategory = correctCategoryLabel(input.categoryId);
+  const amount = normalizeAmount(input.amount);
+
   const recurrenceRuleId =
-    input.recurrence?.enabled && input.recurrence.dayOfMonth
-      ? (await createRecurrenceRule(input.recurrence.dayOfMonth, ownerScope)).id
+    input.recurrence?.enabled && input.recurrence.dayOfMonth && input.recurrence.recurrenceType
+      ? (
+          await createRecurrenceRule(
+            {
+              dayOfMonth: input.recurrence.dayOfMonth,
+              recurrenceType: input.recurrence.recurrenceType,
+              unlimitedMode: input.recurrence.unlimitedMode,
+              maxCycles: input.recurrence.maxCycles,
+              template: {
+                name: input.name,
+                type: input.type,
+                categoryId: input.categoryId,
+                categoryName: correctedCategory,
+                amount,
+                notes: input.notes,
+                startDate: input.transactionDate,
+              },
+            },
+            ownerScope,
+          )
+        ).id
       : null;
 
   const transaction: Omit<TransactionRecord, "nameNormalized" | "categoryNameNormalized" | "notesNormalized"> = {
@@ -18,8 +40,8 @@ export async function createTransactionFromInput(input: TransactionInput, ownerS
     name: input.name,
     type: input.type,
     categoryId: input.categoryId,
-    categoryName: correctCategoryLabel(input.categoryId),
-    amount: normalizeAmount(input.amount),
+    categoryName: correctedCategory,
+    amount,
     transactionDate: input.transactionDate,
     recurrenceRuleId,
     notes: input.notes,
@@ -30,9 +52,7 @@ export async function createTransactionFromInput(input: TransactionInput, ownerS
   };
 
   const created = await createTransaction(transaction);
-  if (created.recurrenceRuleId) {
-    await generateNextRecurrence(created, ownerScope);
-  }
+  await reconcileRecurrence(ownerScope);
 
   return created;
 }
@@ -43,7 +63,8 @@ export async function applyRecurrenceForTransaction(id: string, ownerScope = get
     return null;
   }
 
-  return generateNextRecurrence(tx, ownerScope);
+  await reconcileRecurrence(ownerScope);
+  return tx;
 }
 
 export async function patchTransaction(id: string, patch: Partial<TransactionInput>, ownerScope = getActiveOwnerScope()) {
