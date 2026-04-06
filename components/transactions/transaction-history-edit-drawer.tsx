@@ -172,10 +172,10 @@ export function TransactionHistoryEditDrawer({
             </Select>
             {errors.categoryId ? <p className="text-xs text-danger">{errors.categoryId.message}</p> : null}
 
-            <Input inputMode="decimal" placeholder="Valor" {...register("amount", { required: "Valor obrigatorio" })} />
+            <Input inputMode="decimal" placeholder="Valor" {...register("amount", { required: "Valor obrigatório" })} />
             {errors.amount ? <p className="text-xs text-danger">{errors.amount.message}</p> : null}
 
-            <Input placeholder="Observacao / notas" {...register("notes")} />
+            <Input placeholder="Observação / notas" {...register("notes")} />
 
             {errorMessage ? <p className="text-sm text-danger">{errorMessage}</p> : null}
             {successMessage ? <p className="text-sm text-emerald-400">{successMessage}</p> : null}
