@@ -164,7 +164,7 @@ export function TransactionHistoryEditDrawer({
               <option value="income">Receita</option>
             </Select>
 
-            <Select {...register("categoryId", { required: "Categoria obrigatoria" })}>
+            <Select {...register("categoryId", { required: "Categoria obrigatória" })}>
               <option value="">Selecione a categoria</option>
               {options.map((category) => (
                 <option key={category} value={category}>{category}</option>
