@@ -1,7 +1,7 @@
 # Implementation Plan: Correcoes de Portugues e Acoes no Historico
 
-**Branch**: `017-fix-pt-categories-actions` | **Date**: 2026-04-02 | **Spec**: `C:\apps\wise-cash-app\specs\017-fix-pt-categories-actions\spec.md`
-**Input**: Feature specification from `C:\apps\wise-cash-app\specs\017-fix-pt-categories-actions\spec.md`
+**Branch**: `017-fix-pt-categories-actions` | **Date**: 2026-04-02 | **Spec**: `specs/017-fix-pt-categories-actions/spec.md`
+**Input**: Feature specification from `specs/017-fix-pt-categories-actions/spec.md`
 
 ## Summary
 
