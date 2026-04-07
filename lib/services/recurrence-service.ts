@@ -347,23 +347,26 @@ export async function confirmPendingRecurrenceInstance(id: string, ownerScope = 
 export async function cancelPendingRecurrenceInstance(id: string, ownerScope = getActiveOwnerScope()) {
   assertLocalStorageAvailable();
   const db = getDexieDb();
-  const instance = await db.recurrenceInstances.get(id);
-  if (!instance || instance.ownerScope !== ownerScope) {
-    throw new Error("Pendencia nao encontrada.");
-  }
 
-  if (instance.status !== "pending") {
-    return instance;
-  }
+  return await db.transaction("rw", db.recurrenceInstances, async () => {
+    const instance = await db.recurrenceInstances.get(id);
+    if (!instance || instance.ownerScope !== ownerScope) {
+      throw new Error("Pendencia nao encontrada.");
+    }
 
-  const next: RecurrenceInstanceRecord = {
-    ...instance,
-    status: "canceled",
-    updatedAt: new Date().toISOString(),
-  };
+    if (instance.status !== "pending") {
+      return instance;
+    }
 
-  await db.recurrenceInstances.put(next);
-  return next;
+    const next: RecurrenceInstanceRecord = {
+      ...instance,
+      status: "canceled",
+      updatedAt: new Date().toISOString(),
+    };
+
+    await db.recurrenceInstances.put(next);
+    return next;
+  });
 }
 
 export async function updateRecurrenceRuleForFutureCycles(
