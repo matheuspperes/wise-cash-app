@@ -6,6 +6,11 @@ export type HistoricalTotalBalance = {
   netTotal: number;
 };
 
+export type SecondaryBalanceCardContext = {
+  label: string;
+  value: number;
+};
+
 export type HistoryTransactionType = "income" | "expense";
 
 export type CurrentMonthTransactionRow = {
@@ -14,6 +19,18 @@ export type CurrentMonthTransactionRow = {
   category: string;
   type: "income" | "expense";
   value: number;
+};
+
+export type RecurrencePendingConfirmationRow = {
+  id: string;
+  recurrenceRuleId: string;
+  monthRef: string;
+  dueDate: string;
+  name: string;
+  type: "income" | "expense";
+  categoryName: string;
+  amount: number;
+  notes?: string;
 };
 
 // Legacy alias retained for compatibility with existing component naming.
@@ -27,6 +44,8 @@ export type MonthlyTransactionHistoryRow = {
   type: HistoryTransactionType;
   amount: number;
   notes?: string;
+  source?: "manual" | "recurrence_generated";
+  recurrenceRuleId?: string | null;
 };
 
 export type MonthlyTransactionHistoryGroup = {

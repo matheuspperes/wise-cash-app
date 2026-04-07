@@ -1,6 +1,6 @@
 ﻿# wise-cash-app Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-04-02
+Auto-generated from all feature plans. Last updated: 2026-04-06
 
 ## Active Technologies
 - TypeScript 5.x, Node.js 20+ (stack atual), Python 3.11+ quando aplicavel + Next.js 15.x, React 18, npm (operacao atual), uv (padrao para Python) (002-project-ambience-uv)
@@ -31,6 +31,16 @@ Auto-generated from all feature plans. Last updated: 2026-04-02
 - IndexedDB local-first com schema versionado (`transactions`, `recurrenceRules`, `meta`) e isolamento por bucket de usuario/anomimo (016-local-first-storage)
 - TypeScript 5.x, React 18, Next.js 15 (App Router) + TanStack Query, React Hook Form, Zod, Dexie, lucide-react (017-fix-pt-categories-actions)
 - IndexedDB (Dexie) com dados locais funcionais (transactions, recurrenceRules, meta) (017-fix-pt-categories-actions)
+- TypeScript 5.x, React 18, Next.js 15 (App Router) + React Hook Form, Zod, TanStack Query, Dexie (018-transaction-recurrence)
+- IndexedDB local-first via Dexie (`transactions`, `recurrenceRules`, `meta`) (018-transaction-recurrence)
+- TypeScript 5.x, React 18, Next.js 15 (App Router) + Dexie (IndexedDB), React Hook Form, Zod, TanStack Query (018-transaction-recurrence)
+- Local-first IndexedDB (Dexie): transactions, recurrenceRules, recurrenceInstances (novo), meta (018-transaction-recurrence)
+- TypeScript 5.x, React 18, Next.js 15 (App Router) + TanStack Query, Dexie (dados locais), React Hook Form + Zod, componentes UI internos (019-dashboard-forecast-recurrence-ux)
+- IndexedDB local-first via Dexie (reuso dos dados historicos e recorrentes ja existentes) (019-dashboard-forecast-recurrence-ux)
+- TypeScript 5.x, React 18, Next.js 15 (App Router) + TanStack Query, Dexie, React Hook Form, Zod, Recharts, componentes UI internos (019-dashboard-forecast-recurrence-ux)
+- IndexedDB local-first (Dexie), sem mudanca de schema (019-dashboard-forecast-recurrence-ux)
+- TypeScript 5.x, React 18, Next.js 15 (App Router) + React Hook Form, Zod, componentes UI internos, Tailwind utilities existentes (019-dashboard-forecast-recurrence-ux)
+- IndexedDB local-first (Dexie), sem alteracoes de schema (019-dashboard-forecast-recurrence-ux)
 
 - TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x) + Next.js, Tailwind CSS, Shadcn/UI, TanStack Query, Supabase JS, Recharts (001-monthly-finance-manager)
 
@@ -51,9 +61,7 @@ npm test; npm run lint
 TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x): Follow standard conventions
 
 ## Recent Changes
-- 017-fix-pt-categories-actions: Added TypeScript 5.x, React 18, Next.js 15 (App Router) + TanStack Query, React Hook Form, Zod, Dexie, lucide-react
-- 016-local-first-storage: Added TypeScript 5.8, React 18, Next.js 15 App Router + Dexie.js (IndexedDB wrapper), TanStack Query, React Hook Form, Zod
-- 015-sync-header-period: Added TypeScript 5.8, React 18, Next.js 15 App Router + Next Link/navigation, TanStack Query (dashboard summary), existing UI primitives (`components/ui/button`), existing header component (`components/dashboard/dashboard-header`)
+- 019-dashboard-forecast-recurrence-ux: Added TypeScript 5.x, React 18, Next.js 15 (App Router) + React Hook Form, Zod, componentes UI internos, Tailwind utilities existentes
 
 
 <!-- MANUAL ADDITIONS START -->

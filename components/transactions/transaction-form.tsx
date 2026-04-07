@@ -2,25 +2,55 @@
 
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
+import { SimpleTooltip } from "@/components/ui/simple-tooltip";
 import { extractDigits, formatBrlFromDigits, parseBrlDisplayToAmount } from "@/lib/formatting/brl-currency-mask";
 import { uiText } from "@/lib/i18n/ui-text";
 import { createLocalTransaction } from "@/lib/services/local-transactions-gateway";
 import { StorageUnavailableError } from "@/lib/storage/local-storage-health";
 import { hasDuplicateNormalizedCategory } from "@/lib/ui/category-normalization";
+import { RECURRENCE_MODE_TOOLTIP_LINES, RECURRENCE_TYPE_TOOLTIP_LINES } from "@/lib/ui/recurrence-tooltip-content";
 import { getCategoryPresetsByType, TransactionType } from "@/lib/ui/transaction-category-presets";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo, useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
-const formSchema = z.object({
-  name: z.string().min(1, "Nome obrigatório"),
-  type: z.enum(["income", "expense"]),
-  categoryId: z.string().min(1, "Categoria obrigatória"),
-  amount: z.string().min(1, "Valor obrigatório"),
-  transactionDate: z.string().min(10, "Data obrigatória"),
-  observation: z.string().max(500).optional(),
-});
+const formSchema = z
+  .object({
+    name: z.string().min(1, "Nome obrigatório"),
+    type: z.enum(["income", "expense"]),
+    categoryId: z.string().min(1, "Categoria obrigatória"),
+    amount: z.string().min(1, "Valor obrigatório"),
+    transactionDate: z.string().min(10, "Data obrigatória"),
+    observation: z.string().max(500).optional(),
+    recurrenceEnabled: z.boolean(),
+    recurrenceDayOfMonth: z.number().int().min(1).max(31).optional(),
+    recurrenceType: z.enum(["limited", "unlimited"]).optional(),
+    recurrenceMaxCycles: z.number().int().positive().optional(),
+    recurrenceUnlimitedMode: z.enum(["automatic", "manual"]).optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (!value.recurrenceEnabled) {
+      return;
+    }
+
+    if (!value.recurrenceDayOfMonth) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Dia da recorrência é obrigatório.", path: ["recurrenceDayOfMonth"] });
+    }
+
+    if (!value.recurrenceType) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Tipo de recorrência é obrigatório.", path: ["recurrenceType"] });
+      return;
+    }
+
+    if (value.recurrenceType === "limited" && !value.recurrenceMaxCycles) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Quantidade de meses é obrigatória.", path: ["recurrenceMaxCycles"] });
+    }
+
+    if (value.recurrenceType === "unlimited" && !value.recurrenceUnlimitedMode) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Modo da recorrência é obrigatório.", path: ["recurrenceUnlimitedMode"] });
+    }
+  });
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -44,6 +74,23 @@ type CustomCategoriesByType = Record<TransactionType, string[]>;
 
 function mergeAndSortCategories(preset: readonly string[], custom: readonly string[]) {
   return Array.from(new Set([...preset, ...custom])).sort((left, right) => left.localeCompare(right, "pt-BR"));
+}
+
+function RecurrenceField({
+  tooltipLabel,
+  tooltipLines,
+  children,
+}: {
+  tooltipLabel: string;
+  tooltipLines: readonly string[];
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className="min-w-0 flex-1">{children}</div>
+      <SimpleTooltip className="shrink-0" label={tooltipLabel} lines={tooltipLines} size="compact" />
+    </div>
+  );
 }
 
 export function TransactionForm({ onSaved }: Props) {
@@ -90,10 +137,17 @@ export function TransactionForm({ onSaved }: Props) {
       amount: "",
       transactionDate: today,
       observation: "",
+      recurrenceEnabled: false,
+      recurrenceDayOfMonth: undefined,
+      recurrenceType: undefined,
+      recurrenceMaxCycles: undefined,
+      recurrenceUnlimitedMode: undefined,
     },
   });
 
   const selectedCategoryId = watch("categoryId");
+  const recurrenceEnabled = watch("recurrenceEnabled");
+  const recurrenceType = watch("recurrenceType");
 
   async function onSubmit(data: FormData) {
     const amount = parseBrlDisplayToAmount(data.amount);
@@ -144,6 +198,15 @@ export function TransactionForm({ onSaved }: Props) {
         categoryId: resolvedCategoryId,
         notes: data.observation,
         amount,
+        recurrence: data.recurrenceEnabled
+          ? {
+              enabled: true,
+              dayOfMonth: data.recurrenceDayOfMonth,
+              recurrenceType: data.recurrenceType,
+              maxCycles: data.recurrenceType === "limited" ? data.recurrenceMaxCycles : undefined,
+              unlimitedMode: data.recurrenceType === "unlimited" ? data.recurrenceUnlimitedMode : undefined,
+            }
+          : { enabled: false },
       });
       saved = response.transaction as SavedTransactionPayload | undefined;
     } catch (error) {
@@ -168,6 +231,11 @@ export function TransactionForm({ onSaved }: Props) {
       amount: "",
       transactionDate: data.transactionDate,
       observation: "",
+      recurrenceEnabled: data.recurrenceEnabled,
+      recurrenceDayOfMonth: data.recurrenceDayOfMonth,
+      recurrenceType: data.recurrenceType,
+      recurrenceMaxCycles: data.recurrenceMaxCycles,
+      recurrenceUnlimitedMode: data.recurrenceUnlimitedMode,
     });
     await onSaved?.(saved);
   }
@@ -307,6 +375,144 @@ export function TransactionForm({ onSaved }: Props) {
         <div>
           <Input placeholder={uiText.observation} {...register("observation")} />
           {errors.observation ? <p className="mt-1 text-xs text-danger">{errors.observation.message}</p> : null}
+        </div>
+
+        <div className="md:col-span-2 rounded-xl border border-border bg-surface-alt/40 p-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold">Recorrência</p>
+              <p className="text-xs text-muted">Ative para repetir este lançamento mensalmente.</p>
+            </div>
+            <Controller
+              control={control}
+              name="recurrenceEnabled"
+              render={({ field }) => (
+                <Button
+                  onClick={() => {
+                    const nextEnabled = !field.value;
+                    field.onChange(nextEnabled);
+                    if (!nextEnabled) {
+                      setValue("recurrenceDayOfMonth", undefined, { shouldValidate: true });
+                      setValue("recurrenceType", undefined, { shouldValidate: true });
+                      setValue("recurrenceMaxCycles", undefined, { shouldValidate: true });
+                      setValue("recurrenceUnlimitedMode", undefined, { shouldValidate: true });
+                    }
+                  }}
+                  size="sm"
+                  type="button"
+                  variant={field.value ? "primary" : "secondary"}
+                >
+                  {field.value ? "Recorrência: Ligada" : "Recorrência: Desligada"}
+                </Button>
+              )}
+            />
+          </div>
+
+          {recurrenceEnabled ? (
+            <div className="mt-3 grid gap-3 md:grid-cols-2">
+              <div>
+                <Controller
+                  control={control}
+                  name="recurrenceDayOfMonth"
+                  render={({ field }) => (
+                    <Input
+                      max={31}
+                      min={1}
+                      onChange={(event) => {
+                        const next = Number(event.target.value);
+                        field.onChange(Number.isFinite(next) && next > 0 ? next : undefined);
+                      }}
+                      placeholder="Dia do mês (1-31)"
+                      type="number"
+                      value={field.value ?? ""}
+                    />
+                  )}
+                />
+                {errors.recurrenceDayOfMonth ? <p className="mt-1 text-xs text-danger">{errors.recurrenceDayOfMonth.message}</p> : null}
+              </div>
+
+              <div>
+                <RecurrenceField
+                  tooltipLabel="Explicação do tipo de recorrência"
+                  tooltipLines={RECURRENCE_TYPE_TOOLTIP_LINES}
+                >
+                  <Controller
+                    control={control}
+                    name="recurrenceType"
+                    render={({ field }) => (
+                      <Select
+                        className="w-full min-w-0 flex-1 md:max-w-[14rem]"
+                        onChange={(event) => {
+                          const raw = event.target.value;
+                          const nextType = raw === "" ? undefined : raw as "limited" | "unlimited";
+                          field.onChange(nextType);
+                          if (nextType === "limited") {
+                            setValue("recurrenceUnlimitedMode", undefined, { shouldValidate: true });
+                          }
+                          if (nextType === "unlimited") {
+                            setValue("recurrenceMaxCycles", undefined, { shouldValidate: true });
+                          }
+                        }}
+                        value={field.value ?? ""}
+                      >
+                        <option value="">Tipo de recorrência</option>
+                        <option value="limited">Limitada</option>
+                        <option value="unlimited">Ilimitada</option>
+                      </Select>
+                    )}
+                  />
+                </RecurrenceField>
+                {errors.recurrenceType ? <p className="mt-1 text-xs text-danger">{errors.recurrenceType.message}</p> : null}
+              </div>
+
+              {recurrenceType === "limited" ? (
+                <div>
+                  <Controller
+                    control={control}
+                    name="recurrenceMaxCycles"
+                    render={({ field }) => (
+                      <Input
+                        min={1}
+                        onChange={(event) => {
+                          const next = Number(event.target.value);
+                          field.onChange(Number.isFinite(next) && next > 0 ? next : undefined);
+                        }}
+                        placeholder="Quantidade de meses"
+                        type="number"
+                        value={field.value ?? ""}
+                      />
+                    )}
+                  />
+                  {errors.recurrenceMaxCycles ? <p className="mt-1 text-xs text-danger">{errors.recurrenceMaxCycles.message}</p> : null}
+                </div>
+              ) : null}
+
+              {recurrenceType === "unlimited" ? (
+                <div>
+                  <RecurrenceField
+                    tooltipLabel="Explicação do modo de recorrência"
+                    tooltipLines={RECURRENCE_MODE_TOOLTIP_LINES}
+                  >
+                    <Controller
+                      control={control}
+                      name="recurrenceUnlimitedMode"
+                      render={({ field }) => (
+                        <Select className="w-full min-w-0 flex-1 md:max-w-[14rem]" onChange={(event) => {
+                          const raw = event.target.value;
+                          field.onChange(raw === "" ? undefined : raw as "automatic" | "manual");
+                        }} value={field.value ?? ""}>
+                          <option value="">Modo da recorrência</option>
+                          <option value="automatic">Automática</option>
+                          <option value="manual">Manual</option>
+                        </Select>
+                      )}
+                    />
+                  </RecurrenceField>
+                  {errors.recurrenceUnlimitedMode ? <p className="mt-1 text-xs text-danger">{errors.recurrenceUnlimitedMode.message}</p> : null}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </div>
 
         <Button className="md:col-span-2 md:max-w-40" disabled={isSubmitting} size="sm" type="submit">

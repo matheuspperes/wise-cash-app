@@ -3,6 +3,7 @@
 import { formatMonthYearLabel } from "@/lib/formatting/ptbr";
 import { uiText } from "@/lib/i18n/ui-text";
 import { buildDynamicChartAxisProfile, formatAxisTickLabel } from "@/lib/services/chart-axis-profile";
+import { DashboardViewMode } from "@/lib/ui/dashboard-view-mode";
 import { Select } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { memo } from "react";
@@ -19,8 +20,11 @@ type Point = {
 type Props = {
   data: Point[];
   months: number;
+  viewMode: DashboardViewMode;
   onMonthsChange: (value: number) => void;
+  onViewModeChange: (value: DashboardViewMode) => void;
   isFetching?: boolean;
+  title?: string;
 };
 
 type TooltipPayload = {
@@ -51,9 +55,13 @@ function CustomTooltip({ active, label, payload }: { active?: boolean; label?: s
   );
 }
 
-function AreaHistoryChartInner({ data, months, onMonthsChange, isFetching = false }: Props) {
+function AreaHistoryChartInner({ data, months, viewMode, onMonthsChange, onViewModeChange, isFetching = false, title = uiText.chartHistorical }: Props) {
   if (!data.length) {
-    return <div className="rounded-2xl border border-border bg-surface p-5 text-base text-muted shadow-card">Sem dados históricos.</div>;
+    return (
+      <div className="rounded-2xl border border-border bg-surface p-5 text-base text-muted shadow-card">
+        {viewMode === "previsoes" ? "Sem dados previstos para o período." : "Sem dados históricos."}
+      </div>
+    );
   }
 
   const yAxisProfile = buildDynamicChartAxisProfile(data.flatMap((point) => [point.income, point.expense]));
@@ -61,7 +69,7 @@ function AreaHistoryChartInner({ data, months, onMonthsChange, isFetching = fals
   return (
     <div className="flex h-80 flex-col rounded-2xl border border-border bg-surface p-5 shadow-card">
       <div className="mb-2 flex items-center justify-between gap-3">
-        <p className="text-base text-muted">{uiText.chartHistorical}</p>
+        <p className="text-base text-muted">{title}</p>
         <div className="flex items-center gap-3">
           {isFetching ? <span className="text-sm text-muted">{uiText.syncStatus}</span> : null}
         </div>
@@ -77,11 +85,31 @@ function AreaHistoryChartInner({ data, months, onMonthsChange, isFetching = fals
             Despesas
           </span>
         </div>
-        <Select className="w-[7.25rem] min-w-[6.5rem] sm:w-32" value={months} onChange={(e) => onMonthsChange(Number(e.target.value))}>
-          <option value={3}>3 meses</option>
-          <option value={6}>6 meses</option>
-          <option value={12}>12 meses</option>
-        </Select>
+        <div className="flex items-center gap-2">
+          <div className="inline-flex rounded-lg border border-border bg-surface-alt p-1">
+            <button
+              aria-pressed={viewMode === "historico"}
+              className={viewMode === "historico" ? "rounded-md bg-surface px-2 py-1 text-xs font-semibold text-foreground" : "rounded-md px-2 py-1 text-xs font-semibold text-muted"}
+              onClick={() => onViewModeChange("historico")}
+              type="button"
+            >
+              Histórico
+            </button>
+            <button
+              aria-pressed={viewMode === "previsoes"}
+              className={viewMode === "previsoes" ? "rounded-md bg-surface px-2 py-1 text-xs font-semibold text-foreground" : "rounded-md px-2 py-1 text-xs font-semibold text-muted"}
+              onClick={() => onViewModeChange("previsoes")}
+              type="button"
+            >
+              Previsões
+            </button>
+          </div>
+          <Select className="w-[7.25rem] min-w-[6.5rem] sm:w-32" value={months} onChange={(e) => onMonthsChange(Number(e.target.value))}>
+            <option value={3}>3 meses</option>
+            <option value={6}>6 meses</option>
+            <option value={12}>12 meses</option>
+          </Select>
+        </div>
       </div>
       <div className="min-h-0 flex-1">
         <ResponsiveContainer width="100%" height="100%">
