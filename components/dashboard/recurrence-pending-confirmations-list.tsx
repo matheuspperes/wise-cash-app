@@ -18,8 +18,8 @@ export function RecurrencePendingConfirmationsList({ isSubmitting, items, onCanc
   return (
     <section className="rounded-2xl border border-border bg-surface p-4 shadow-card">
       <div className="mb-3">
-        <h2 className="text-base font-semibold">Confirmacoes pendentes de recorrencia</h2>
-        <p className="text-sm text-muted">Confirme ou cancele as pendencias antes da efetivacao no historico.</p>
+        <h2 className="text-base font-semibold">Confirmações pendentes de recorrência</h2>
+        <p className="text-sm text-muted">Confirme ou cancele as pendências antes da efetivação no histórico.</p>
       </div>
       <div className="space-y-2">
         {items.map((item) => (
