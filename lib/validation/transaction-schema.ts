@@ -14,22 +14,22 @@ const recurrenceSchema = z
     }
 
     if (!value.dayOfMonth) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Dia da recorrencia obrigatorio.", path: ["dayOfMonth"] });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Dia da recorrência obrigatório.", path: ["dayOfMonth"] });
     }
 
     if (!value.recurrenceType) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Tipo de recorrencia obrigatorio.", path: ["recurrenceType"] });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Tipo de recorrência obrigatório.", path: ["recurrenceType"] });
       return;
     }
 
     if (value.recurrenceType === "limited") {
       if (!value.maxCycles || !Number.isInteger(value.maxCycles) || value.maxCycles <= 0) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Quantidade de meses obrigatoria.", path: ["maxCycles"] });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Quantidade de meses obrigatória.", path: ["maxCycles"] });
       }
     }
 
     if (value.recurrenceType === "unlimited" && !value.unlimitedMode) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Modo da recorrencia obrigatorio.", path: ["unlimitedMode"] });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Modo da recorrência obrigatório.", path: ["unlimitedMode"] });
     }
   });
 
