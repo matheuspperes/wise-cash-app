@@ -62,8 +62,6 @@ TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x): Follow standard c
 
 ## Recent Changes
 - 019-dashboard-forecast-recurrence-ux: Added TypeScript 5.x, React 18, Next.js 15 (App Router) + React Hook Form, Zod, componentes UI internos, Tailwind utilities existentes
-- 019-dashboard-forecast-recurrence-ux: Added TypeScript 5.x, React 18, Next.js 15 (App Router) + React Hook Form, Zod, componentes UI internos, Tailwind utilities existentes
-- 019-dashboard-forecast-recurrence-ux: Added TypeScript 5.x, React 18, Next.js 15 (App Router) + React Hook Form, Zod, componentes UI internos, Tailwind utilities existentes
 
 
 <!-- MANUAL ADDITIONS START -->
