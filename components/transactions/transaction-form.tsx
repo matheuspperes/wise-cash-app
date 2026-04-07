@@ -443,7 +443,8 @@ export function TransactionForm({ onSaved }: Props) {
                       <Select
                         className="w-full min-w-0 flex-1 md:max-w-[14rem]"
                         onChange={(event) => {
-                          const nextType = event.target.value as "limited" | "unlimited";
+                          const raw = event.target.value;
+                          const nextType = raw === "" ? undefined : raw as "limited" | "unlimited";
                           field.onChange(nextType);
                           if (nextType === "limited") {
                             setValue("recurrenceUnlimitedMode", undefined, { shouldValidate: true });
@@ -496,7 +497,10 @@ export function TransactionForm({ onSaved }: Props) {
                       control={control}
                       name="recurrenceUnlimitedMode"
                       render={({ field }) => (
-                        <Select className="w-full min-w-0 flex-1 md:max-w-[14rem]" onChange={(event) => field.onChange(event.target.value)} value={field.value ?? ""}>
+                        <Select className="w-full min-w-0 flex-1 md:max-w-[14rem]" onChange={(event) => {
+                          const raw = event.target.value;
+                          field.onChange(raw === "" ? undefined : raw as "automatic" | "manual");
+                        }} value={field.value ?? ""}>
                           <option value="">Modo da recorrência</option>
                           <option value="automatic">Automática</option>
                           <option value="manual">Manual</option>

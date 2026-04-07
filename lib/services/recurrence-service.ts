@@ -192,7 +192,7 @@ function getLimitedEndMonth(startMonthRef: string, maxCycles: number) {
 async function updateRuleProgress(rule: RecurrenceRuleRecord) {
   const db = getDexieDb();
   const generated = await listRuleTransactions(rule.ownerScope, rule.id);
-  const generatedCycles = generated.length;
+  const generatedCycles = generated.filter((tx) => tx.source === "recurrence_generated").length;
 
   const nextRule: RecurrenceRuleRecord = {
     ...rule,
@@ -269,14 +269,16 @@ export async function reconcileRecurrence(ownerScope = getActiveOwnerScope(), re
       }
     }
 
-    await db.recurrenceRules.put({
+    const updatedRule: RecurrenceRuleRecord = {
       ...rule,
       projectionUntilMonthRef: projectionHorizon,
       lastProcessedMonthRef: endMonthRef,
       updatedAt: new Date().toISOString(),
-    });
+    };
 
-    await updateRuleProgress(rule);
+    await db.recurrenceRules.put(updatedRule);
+
+    await updateRuleProgress(updatedRule);
   }
 }
 
@@ -306,42 +308,46 @@ export async function listPendingRecurrenceInstances(ownerScope = getActiveOwner
 export async function confirmPendingRecurrenceInstance(id: string, ownerScope = getActiveOwnerScope()) {
   assertLocalStorageAvailable();
   const db = getDexieDb();
-  const instance = await db.recurrenceInstances.get(id);
-  if (!instance || instance.ownerScope !== ownerScope) {
-    throw new Error("Pendencia nao encontrada.");
-  }
 
-  if (instance.status !== "pending") {
-    return instance;
-  }
+  return await db.transaction("rw", [db.recurrenceInstances, db.transactions], async () => {
+    const instance = await db.recurrenceInstances.get(id);
+    if (!instance || instance.ownerScope !== ownerScope) {
+      throw new Error("Pendencia nao encontrada.");
+    }
 
-  const transactionPayload: Omit<TransactionRecord, "nameNormalized" | "categoryNameNormalized" | "notesNormalized"> = {
-    id: crypto.randomUUID(),
-    ownerScope,
-    name: instance.snapshotName,
-    type: instance.snapshotType,
-    categoryId: instance.snapshotCategoryId,
-    categoryName: instance.snapshotCategoryName,
-    amount: instance.snapshotAmount,
-    transactionDate: instance.dueDate,
-    recurrenceRuleId: instance.recurrenceRuleId,
-    notes: instance.snapshotNotes,
-    source: "recurrence_generated",
-    status: "active",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
+    if (instance.status !== "pending") {
+      return instance;
+    }
 
-  const created = await createTransaction(transactionPayload);
-  const next: RecurrenceInstanceRecord = {
-    ...instance,
-    status: "confirmed",
-    transactionId: created.id,
-    updatedAt: new Date().toISOString(),
-  };
+    const now = new Date().toISOString();
+    const transactionPayload: Omit<TransactionRecord, "nameNormalized" | "categoryNameNormalized" | "notesNormalized"> = {
+      id: crypto.randomUUID(),
+      ownerScope,
+      name: instance.snapshotName,
+      type: instance.snapshotType,
+      categoryId: instance.snapshotCategoryId,
+      categoryName: instance.snapshotCategoryName,
+      amount: instance.snapshotAmount,
+      transactionDate: instance.dueDate,
+      recurrenceRuleId: instance.recurrenceRuleId,
+      notes: instance.snapshotNotes,
+      source: "recurrence_generated",
+      status: "active",
+      createdAt: now,
+      updatedAt: now,
+    };
 
-  await db.recurrenceInstances.put(next);
-  return next;
+    const created = await createTransaction(transactionPayload);
+    const next: RecurrenceInstanceRecord = {
+      ...instance,
+      status: "confirmed",
+      transactionId: created.id,
+      updatedAt: now,
+    };
+
+    await db.recurrenceInstances.put(next);
+    return next;
+  });
 }
 
 export async function cancelPendingRecurrenceInstance(id: string, ownerScope = getActiveOwnerScope()) {

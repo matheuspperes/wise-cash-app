@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { formatCurrencyBRL, formatDateBR } from "@/lib/formatting/ptbr";
 import { RecurrencePendingConfirmationRow } from "@/lib/ui/dashboard-history-types";
 
 type Props = {
@@ -27,9 +28,9 @@ export function RecurrencePendingConfirmationsList({ isSubmitting, items, onCanc
             <div>
               <p className="text-sm font-semibold">{item.name}</p>
               <p className="text-xs text-muted">
-                {item.categoryName} • {item.dueDate} • {item.type === "income" ? "Receita" : "Despesa"}
+                {item.categoryName} • {formatDateBR(item.dueDate)} • {item.type === "income" ? "Receita" : "Despesa"}
               </p>
-              <p className="text-sm">R$ {item.amount.toFixed(2)}</p>
+              <p className="text-sm">{formatCurrencyBRL(item.amount)}</p>
             </div>
             <div className="flex items-center gap-2">
               <Button
