@@ -83,3 +83,18 @@ body {
     color: var(--foreground);
   }
 }
+
+@layer components {
+  .btn-visual-secondary {
+    border: 1px solid color-mix(in srgb, var(--secondary) 36%, transparent);
+    background: color-mix(in srgb, var(--secondary) 14%, transparent);
+    color: var(--foreground);
+    box-shadow: var(--shadow-card);
+    transition: background-color var(--duration-normal) ease, transform var(--duration-fast) ease;
+  }
+
+  .btn-visual-secondary:hover {
+    background: color-mix(in srgb, var(--secondary) 22%, transparent);
+    transform: translateY(-1px);
+  }
+}

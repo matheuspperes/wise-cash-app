@@ -33,6 +33,22 @@ export type RecurrencePendingConfirmationRow = {
   notes?: string;
 };
 
+export type RecurrenceListRow = {
+  id: string;
+  name: string;
+  categoryName: string;
+  type: "income" | "expense";
+  amount: number;
+  dayOfMonth: number;
+  nextScheduledDate: string;
+  recurrenceType: "limited" | "unlimited";
+  isActive: boolean;
+  maxCycles: number | null;
+  generatedCycles: number;
+  monthsRemaining: number | null;
+  statusLabel: string;
+};
+
 // Legacy alias retained for compatibility with existing component naming.
 export type CurrentMonthExpenseRow = CurrentMonthTransactionRow;
 

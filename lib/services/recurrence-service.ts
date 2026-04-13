@@ -39,6 +39,21 @@ export type RecurrencePendingItem = {
   notes?: string;
 };
 
+export type RecurrenceRuleListItem = {
+  id: string;
+  name: string;
+  categoryName: string;
+  type: TxType;
+  amount: number;
+  dayOfMonth: number;
+  nextScheduledDate: string;
+  recurrenceType: RecurrenceType;
+  isActive: boolean;
+  maxCycles: number | null;
+  generatedCycles: number;
+  monthsRemaining: number | null;
+};
+
 export type RecurrenceRuleUpdateInput = {
   dayOfMonth?: number;
   recurrenceType?: RecurrenceType;
@@ -101,6 +116,31 @@ function getProjectionHorizon(referenceDate: Date) {
 
 function getStartMonthRef(rule: RecurrenceRuleRecord) {
   return shiftMonthRef(toMonthRef(rule.startDate), 1);
+}
+
+function getMonthsRemaining(rule: RecurrenceRuleRecord) {
+  if (rule.recurrenceType !== "limited") {
+    return null;
+  }
+
+  const maxCycles = rule.maxCycles ?? 0;
+  return Math.max(maxCycles - rule.generatedCycles, 0);
+}
+
+function getNextScheduledDate(rule: RecurrenceRuleRecord, referenceDate = new Date()) {
+  const startMonthRef = getStartMonthRef(rule);
+  const effectiveMonthRef = toEffectiveMonthRef(referenceDate);
+  let candidateMonthRef = compareMonthRef(startMonthRef, effectiveMonthRef) > 0 ? startMonthRef : effectiveMonthRef;
+
+  if (rule.recurrenceType === "limited") {
+    const maxCycles = rule.maxCycles ?? 1;
+    const limitedEndMonthRef = getLimitedEndMonth(startMonthRef, maxCycles);
+    if (compareMonthRef(candidateMonthRef, limitedEndMonthRef) > 0) {
+      candidateMonthRef = limitedEndMonthRef;
+    }
+  }
+
+  return resolveDueDate(candidateMonthRef, rule.dayOfMonth);
 }
 
 async function findGeneratedTransactionByRuleAndDate(ownerScope: string, recurrenceRuleId: string, transactionDate: string) {
@@ -282,6 +322,32 @@ export async function reconcileRecurrence(ownerScope = getActiveOwnerScope(), re
   }
 }
 
+export async function listRecurrenceRules(ownerScope = getActiveOwnerScope(), referenceDate = new Date()): Promise<RecurrenceRuleListItem[]> {
+  assertLocalStorageAvailable();
+  const db = getDexieDb();
+  const rules = await db.recurrenceRules
+    .toCollection()
+    .filter((rule) => rule.ownerScope === ownerScope)
+    .toArray();
+
+  return rules
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
+    .map((rule) => ({
+      id: rule.id,
+      name: rule.templateName,
+      categoryName: rule.templateCategoryName,
+      type: rule.templateType,
+      amount: rule.templateAmount,
+      dayOfMonth: rule.dayOfMonth,
+      nextScheduledDate: getNextScheduledDate(rule, referenceDate),
+      recurrenceType: rule.recurrenceType,
+      isActive: rule.isActive,
+      maxCycles: rule.maxCycles,
+      generatedCycles: rule.generatedCycles,
+      monthsRemaining: getMonthsRemaining(rule),
+    }));
+}
+
 export async function listPendingRecurrenceInstances(ownerScope = getActiveOwnerScope()): Promise<RecurrencePendingItem[]> {
   assertLocalStorageAvailable();
   const db = getDexieDb();
@@ -437,4 +503,11 @@ export async function updateRecurrenceRuleForFutureCycles(
 
   await reconcileRecurrence(ownerScope);
   return nextRule;
+}
+
+export async function deactivateRecurrenceRule(
+  recurrenceRuleId: string,
+  ownerScope = getActiveOwnerScope(),
+) {
+  return updateRecurrenceRuleForFutureCycles(recurrenceRuleId, { isActive: false }, ownerScope);
 }

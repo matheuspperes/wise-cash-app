@@ -5,14 +5,30 @@ import { TransactionHistoryEditDrawer } from "@/components/transactions/transact
 import { SavedTransactionPayload, TransactionForm } from "@/components/transactions/transaction-form";
 import { MonthlyExpenseHistoryAccordion } from "@/components/transactions/monthly-expense-history-accordion";
 import { TransactionSearch } from "@/components/transactions/transaction-search";
+import { RecurrencesPage } from "@/components/recurrences/recurrences-page";
 import { Button } from "@/components/ui/button";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { formatCurrencyBRL, formatDateBR } from "@/lib/formatting/ptbr";
 import { uiText } from "@/lib/i18n/ui-text";
 import { getLocalDashboardSummary } from "@/lib/services/local-dashboard-summary";
-import { listLocalTransactions, patchLocalTransaction, removeLocalTransaction } from "@/lib/services/local-transactions-gateway";
+import {
+  cancelLocalRecurrencePending,
+  confirmLocalRecurrencePending,
+  deactivateLocalRecurrence,
+  listLocalRecurrencePendingConfirmations,
+  listLocalRecurrences,
+  listLocalTransactions,
+  patchLocalTransaction,
+  removeLocalTransaction,
+  updateLocalRecurrence,
+} from "@/lib/services/local-transactions-gateway";
 import { StorageUnavailableError } from "@/lib/storage/local-storage-health";
-import { MonthlyExpenseHistoryGroup, MonthlyTransactionHistoryRow } from "@/lib/ui/dashboard-history-types";
+import {
+  MonthlyExpenseHistoryGroup,
+  MonthlyTransactionHistoryRow,
+  RecurrenceListRow,
+  RecurrencePendingConfirmationRow,
+} from "@/lib/ui/dashboard-history-types";
 import { hasActiveFilterCriteria, hasFilterStateChanged, TransactionsFilterState } from "@/lib/ui/transactions-filter-activation";
 import { parseTransactionsView, shouldResetTemporaryLaunches, TransactionsView } from "@/lib/ui/transactions-view";
 import Link from "next/link";
@@ -28,12 +44,30 @@ type Tx = {
   transactionDate: string;
 };
 
+function getRecurrenceStatusLabel(item: { recurrenceType: "limited" | "unlimited"; monthsRemaining: number | null }) {
+  if (item.recurrenceType === "unlimited") {
+    return "Ilimitada";
+  }
+
+  const remaining = Math.max(item.monthsRemaining ?? 0, 0);
+  if (remaining === 0) {
+    return "Sem ciclos restantes";
+  }
+
+  if (remaining === 1) {
+    return "1 mês faltante";
+  }
+
+  return `${remaining} meses faltantes`;
+}
+
 export default function TransactionsPageClient() {
   const searchParams = useSearchParams();
   const view = parseTransactionsView(searchParams.get("view"));
   const previousViewRef = useRef<TransactionsView | null>(view);
   const showHistory = view === "history";
   const showNew = view === "new";
+  const showRecurrences = view === "recurrences";
 
   const [items, setItems] = useState<Tx[]>([]);
   const [hasUserEditedFilter, setHasUserEditedFilter] = useState(false);
@@ -46,11 +80,19 @@ export default function TransactionsPageClient() {
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [editSuccessMessage, setEditSuccessMessage] = useState<string | null>(null);
   const [editErrorMessage, setEditErrorMessage] = useState<string | null>(null);
+  const [recurrenceItems, setRecurrenceItems] = useState<RecurrenceListRow[]>([]);
+  const [recurrencePendingItems, setRecurrencePendingItems] = useState<RecurrencePendingConfirmationRow[]>([]);
+  const [isLoadingRecurrences, setIsLoadingRecurrences] = useState(false);
+  const [isSubmittingRecurrence, setIsSubmittingRecurrence] = useState(false);
+  const [isSavingRecurrenceEdit, setIsSavingRecurrenceEdit] = useState(false);
+  const [recurrenceError, setRecurrenceError] = useState<string | null>(null);
+  const [recurrenceEditError, setRecurrenceEditError] = useState<string | null>(null);
   const [q, setQ] = useState("");
   const [filters, setFilters] = useState<TransactionsFilterState>({});
 
   const historyViewHref = "/transactions?view=history";
   const newViewHref = "/transactions?view=new";
+  const recurrencesViewHref = "/transactions?view=recurrences";
 
   const historyStyleBase = "h-10 border border-border/80 bg-surface-alt text-foreground shadow-card hover:bg-surface";
 
@@ -95,6 +137,44 @@ export default function TransactionsPageClient() {
     }
   }, []);
 
+  const loadRecurrences = useCallback(async () => {
+    setIsLoadingRecurrences(true);
+    try {
+      const [recurrencesResponse, pendingResponse] = await Promise.all([
+        listLocalRecurrences(),
+        listLocalRecurrencePendingConfirmations(),
+      ]);
+
+      setRecurrenceItems((recurrencesResponse.items ?? []).map((item) => ({
+        id: item.id,
+        name: item.name,
+        categoryName: item.categoryName,
+        type: item.type,
+        amount: item.amount,
+        dayOfMonth: item.dayOfMonth,
+        nextScheduledDate: item.nextScheduledDate,
+        recurrenceType: item.recurrenceType,
+        isActive: item.isActive,
+        maxCycles: item.maxCycles,
+        generatedCycles: item.generatedCycles,
+        monthsRemaining: item.monthsRemaining,
+        statusLabel: getRecurrenceStatusLabel(item),
+      })));
+      setRecurrencePendingItems(pendingResponse.items ?? []);
+      setRecurrenceError(null);
+    } catch (error) {
+      if (error instanceof StorageUnavailableError) {
+        setRecurrenceError("Armazenamento local indisponível. Não foi possível carregar as recorrências.");
+      } else {
+        setRecurrenceError("Não foi possível carregar as recorrências.");
+      }
+      setRecurrenceItems([]);
+      setRecurrencePendingItems([]);
+    } finally {
+      setIsLoadingRecurrences(false);
+    }
+  }, []);
+
   useEffect(() => {
     const previousView = previousViewRef.current;
     if (shouldResetTemporaryLaunches(previousView, view)) {
@@ -112,19 +192,35 @@ export default function TransactionsPageClient() {
   }, [loadMonthlyHistory]);
 
   useEffect(() => {
+    loadRecurrences();
+  }, [loadRecurrences]);
+
+  useEffect(() => {
     const onLocalReset = () => {
       setTemporaryLaunches([]);
       setEditingRow(null);
       setEditSuccessMessage(null);
       setEditErrorMessage(null);
-      void Promise.all([load(), loadMonthlyHistory()]);
+      setRecurrenceEditError(null);
+      void Promise.all([load(), loadMonthlyHistory(), loadRecurrences()]);
     };
 
     window.addEventListener("wisecash:local-reset", onLocalReset);
     return () => {
       window.removeEventListener("wisecash:local-reset", onLocalReset);
     };
-  }, [load, loadMonthlyHistory]);
+  }, [load, loadMonthlyHistory, loadRecurrences]);
+
+  useEffect(() => {
+    const onTransactionsMutated = () => {
+      void loadRecurrences();
+    };
+
+    window.addEventListener("wisecash:transactions-mutated", onTransactionsMutated);
+    return () => {
+      window.removeEventListener("wisecash:transactions-mutated", onTransactionsMutated);
+    };
+  }, [loadRecurrences]);
 
   const hasActiveFilters = useMemo(() => hasActiveFilterCriteria(filters, q), [filters, q]);
   const shouldShowFilteredResults = hasUserEditedFilter && hasActiveFilters;
@@ -216,6 +312,106 @@ export default function TransactionsPageClient() {
     [editingRow, load, loadMonthlyHistory],
   );
 
+  const handleConfirmPendingRecurrence = useCallback(
+    async (id: string) => {
+      setIsSubmittingRecurrence(true);
+      try {
+        await confirmLocalRecurrencePending(id);
+        await Promise.all([loadRecurrences(), loadMonthlyHistory()]);
+        setRecurrenceError(null);
+        window.dispatchEvent(new Event("wisecash:transactions-mutated"));
+      } catch (error) {
+        if (error instanceof StorageUnavailableError) {
+          setRecurrenceError("Armazenamento local indisponível. Não foi possível confirmar a pendência.");
+        } else {
+          setRecurrenceError("Não foi possível confirmar a pendência.");
+        }
+      } finally {
+        setIsSubmittingRecurrence(false);
+      }
+    },
+    [loadRecurrences, loadMonthlyHistory],
+  );
+
+  const handleCancelPendingRecurrence = useCallback(
+    async (id: string) => {
+      setIsSubmittingRecurrence(true);
+      try {
+        await cancelLocalRecurrencePending(id);
+        await Promise.all([loadRecurrences(), loadMonthlyHistory()]);
+        setRecurrenceError(null);
+        window.dispatchEvent(new Event("wisecash:transactions-mutated"));
+      } catch (error) {
+        if (error instanceof StorageUnavailableError) {
+          setRecurrenceError("Armazenamento local indisponível. Não foi possível cancelar a pendência.");
+        } else {
+          setRecurrenceError("Não foi possível cancelar a pendência.");
+        }
+      } finally {
+        setIsSubmittingRecurrence(false);
+      }
+    },
+    [loadRecurrences, loadMonthlyHistory],
+  );
+
+  const handleDeleteRecurrence = useCallback(
+    async (id: string) => {
+      const confirmed = window.confirm("Desativar esta recorrência?");
+      if (!confirmed) {
+        return;
+      }
+
+      setIsSubmittingRecurrence(true);
+      try {
+        await deactivateLocalRecurrence(id);
+        await Promise.all([loadRecurrences(), loadMonthlyHistory()]);
+        setRecurrenceError(null);
+        window.dispatchEvent(new Event("wisecash:transactions-mutated"));
+      } catch (error) {
+        if (error instanceof StorageUnavailableError) {
+          setRecurrenceError("Armazenamento local indisponível. Não foi possível desativar a recorrência.");
+        } else {
+          setRecurrenceError("Não foi possível desativar a recorrência.");
+        }
+      } finally {
+        setIsSubmittingRecurrence(false);
+      }
+    },
+    [loadRecurrences, loadMonthlyHistory],
+  );
+
+  const handleSaveRecurrenceEdit = useCallback(
+    async (
+      id: string,
+      payload: {
+        dayOfMonth: number;
+        recurrenceType: "limited" | "unlimited";
+        maxCycles?: number;
+      },
+    ) => {
+      setIsSavingRecurrenceEdit(true);
+      setRecurrenceEditError(null);
+      try {
+        await updateLocalRecurrence(id, {
+          dayOfMonth: payload.dayOfMonth,
+          recurrenceType: payload.recurrenceType,
+          maxCycles: payload.recurrenceType === "limited" ? payload.maxCycles : undefined,
+        });
+        await Promise.all([loadRecurrences(), loadMonthlyHistory()]);
+        window.dispatchEvent(new Event("wisecash:transactions-mutated"));
+      } catch (error) {
+        if (error instanceof StorageUnavailableError) {
+          setRecurrenceEditError("Armazenamento local indisponível. Não foi possível salvar a recorrência.");
+        } else {
+          setRecurrenceEditError("Não foi possível salvar a recorrência.");
+        }
+      } finally {
+        setIsSavingRecurrenceEdit(false);
+      }
+    },
+    [loadRecurrences, loadMonthlyHistory],
+  );
+
   const renderTransactionRows = useCallback(
     (rows: Tx[] | SavedTransactionPayload[], showActions = false) => rows.map((item) => (
       <tr className="text-sm" key={item.id}>
@@ -256,12 +452,39 @@ export default function TransactionsPageClient() {
     <main className="mx-auto flex max-w-[76.8rem] flex-col gap-5 p-5">
       <DashboardHeader
         controls={(
-          <Button asChild className={historyStyleBase} size="md" variant="secondary">
-            <Link href="/">Voltar ao Dashboard</Link>
-          </Button>
+          <div className="flex w-full flex-wrap items-center justify-end gap-2 md:w-auto md:gap-3">
+            <Button asChild className={historyStyleBase} size="md" variant="secondary">
+              <Link href="/">Voltar ao Dashboard</Link>
+            </Button>
+            <Button asChild className={historyStyleBase} size="md" variant="secondary">
+              <Link href={historyViewHref}>Histórico</Link>
+            </Button>
+            <Button asChild className={historyStyleBase} size="md" variant="secondary">
+              <Link href={recurrencesViewHref}>Recorrências</Link>
+            </Button>
+            <Button asChild className="h-10 bg-[var(--primary-cta)] px-4 text-sm text-white shadow-elevated hover:brightness-110" size="md">
+              <Link href={newViewHref}>Nova Transação</Link>
+            </Button>
+          </div>
         )}
         title={uiText.transactions}
       />
+
+      {showRecurrences ? (
+        <RecurrencesPage
+          editErrorMessage={recurrenceEditError}
+          errorMessage={recurrenceError}
+          isLoading={isLoadingRecurrences}
+          isSavingEdit={isSavingRecurrenceEdit}
+          isSubmitting={isSubmittingRecurrence}
+          onCancelPending={handleCancelPendingRecurrence}
+          onConfirmPending={handleConfirmPendingRecurrence}
+          onDeleteRecurrence={handleDeleteRecurrence}
+          onSaveEditRecurrence={handleSaveRecurrenceEdit}
+          pendingItems={recurrencePendingItems}
+          recurrenceItems={recurrenceItems}
+        />
+      ) : null}
 
       {showNew ? (
         <>

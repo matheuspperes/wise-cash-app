@@ -1,6 +1,6 @@
 ﻿# wise-cash-app Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-04-06
+Auto-generated from all feature plans. Last updated: 2026-04-13
 
 ## Active Technologies
 - TypeScript 5.x, Node.js 20+ (stack atual), Python 3.11+ quando aplicavel + Next.js 15.x, React 18, npm (operacao atual), uv (padrao para Python) (002-project-ambience-uv)
@@ -41,6 +41,8 @@ Auto-generated from all feature plans. Last updated: 2026-04-06
 - IndexedDB local-first (Dexie), sem mudanca de schema (019-dashboard-forecast-recurrence-ux)
 - TypeScript 5.x, React 18, Next.js 15 (App Router) + React Hook Form, Zod, componentes UI internos, Tailwind utilities existentes (019-dashboard-forecast-recurrence-ux)
 - IndexedDB local-first (Dexie), sem alteracoes de schema (019-dashboard-forecast-recurrence-ux)
+- TypeScript 5.x, React 18, Next.js 15 (App Router) + Next.js, react-hook-form, zod, @tanstack/react-query, Tailwind CSS, Radix primitives (020-add-recurrences-view)
+- Persistencia local via camada `local-finance` (in-memory/Dexie-style local gateway) (020-add-recurrences-view)
 
 - TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x) + Next.js, Tailwind CSS, Shadcn/UI, TanStack Query, Supabase JS, Recharts (001-monthly-finance-manager)
 
@@ -61,6 +63,7 @@ npm test; npm run lint
 TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x): Follow standard conventions
 
 ## Recent Changes
+- 020-add-recurrences-view: Added TypeScript 5.x, React 18, Next.js 15 (App Router) + Next.js, react-hook-form, zod, @tanstack/react-query, Tailwind CSS, Radix primitives
 - 019-dashboard-forecast-recurrence-ux: Added TypeScript 5.x, React 18, Next.js 15 (App Router) + React Hook Form, Zod, componentes UI internos, Tailwind utilities existentes
 
 

@@ -1,7 +1,14 @@
 import { softDeleteTransaction } from "@/lib/repositories/transaction-repository";
 import { searchTransactions } from "@/lib/repositories/transaction-search";
 import { getLocalDashboardSummary, reconcileAfterRecurrenceMutation } from "@/lib/services/local-dashboard-summary";
-import { cancelPendingRecurrenceInstance, confirmPendingRecurrenceInstance, listPendingRecurrenceInstances } from "@/lib/services/recurrence-service";
+import {
+  cancelPendingRecurrenceInstance,
+  confirmPendingRecurrenceInstance,
+  deactivateRecurrenceRule,
+  listPendingRecurrenceInstances,
+  listRecurrenceRules,
+  updateRecurrenceRuleForFutureCycles,
+} from "@/lib/services/recurrence-service";
 import { StorageUnavailableError, assertLocalStorageAvailable } from "@/lib/storage/local-storage-health";
 import { getActiveOwnerScope } from "@/lib/storage/scoped-db";
 import { patchTransaction, createTransactionFromInput } from "@/lib/services/transaction-service";
@@ -123,6 +130,58 @@ export async function cancelLocalRecurrencePending(id: string) {
     const instance = await cancelPendingRecurrenceInstance(id, ownerScope);
     await reconcileAfterRecurrenceMutation(ownerScope);
     return { instance };
+  } catch (error) {
+    return mapStorageError(error);
+  }
+}
+
+export async function listLocalRecurrences() {
+  try {
+    assertLocalStorageAvailable();
+    const ownerScope = getActiveOwnerScope();
+    await reconcileAfterRecurrenceMutation(ownerScope);
+    const items = await listRecurrenceRules(ownerScope);
+    return { items };
+  } catch (error) {
+    return mapStorageError(error);
+  }
+}
+
+export async function updateLocalRecurrence(
+  id: string,
+  patch: {
+    dayOfMonth?: number;
+    recurrenceType?: "limited" | "unlimited";
+    unlimitedMode?: "automatic" | "manual";
+    maxCycles?: number;
+    template?: {
+      name?: string;
+      type?: "income" | "expense";
+      categoryId?: string;
+      categoryName?: string;
+      amount?: number;
+      notes?: string;
+    };
+  },
+) {
+  try {
+    assertLocalStorageAvailable();
+    const ownerScope = getActiveOwnerScope();
+    const recurrence = await updateRecurrenceRuleForFutureCycles(id, patch, ownerScope);
+    await reconcileAfterRecurrenceMutation(ownerScope);
+    return { recurrence };
+  } catch (error) {
+    return mapStorageError(error);
+  }
+}
+
+export async function deactivateLocalRecurrence(id: string) {
+  try {
+    assertLocalStorageAvailable();
+    const ownerScope = getActiveOwnerScope();
+    const recurrence = await deactivateRecurrenceRule(id, ownerScope);
+    await reconcileAfterRecurrenceMutation(ownerScope);
+    return { recurrence };
   } catch (error) {
     return mapStorageError(error);
   }
