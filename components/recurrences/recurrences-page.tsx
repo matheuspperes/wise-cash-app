@@ -82,22 +82,23 @@ export function RecurrencesPage({
       {errorMessage ? <p className="text-sm text-danger">{errorMessage}</p> : null}
 
       {shouldRenderPendingBlock ? (
-        <section className="rounded-2xl border border-border bg-surface p-4 shadow-card">
-          <div className="mb-3">
-            <h2 className="text-base font-semibold">{RECURRENCES_PENDING_SECTION_TITLE}</h2>
-            <p className="text-sm text-muted">{RECURRENCES_PENDING_SECTION_DESCRIPTION}</p>
-          </div>
-          {isLoading ? <p className="text-sm text-muted">Carregando pendências...</p> : null}
-          {!isLoading && !pendingItems.length ? <p className="text-sm text-muted">{RECURRENCES_PENDING_EMPTY_LABEL}</p> : null}
-          {!isLoading && pendingItems.length ? (
-            <RecurrencePendingConfirmationsList
-              isSubmitting={isSubmitting}
-              items={pendingItems}
-              onCancel={onCancelPending}
-              onConfirm={onConfirmPending}
-            />
-          ) : null}
-        </section>
+        isLoading || !pendingItems.length ? (
+          <section className="rounded-2xl border border-border bg-surface p-4 shadow-card">
+            <div className="mb-3">
+              <h2 className="text-base font-semibold">{RECURRENCES_PENDING_SECTION_TITLE}</h2>
+              <p className="text-sm text-muted">{RECURRENCES_PENDING_SECTION_DESCRIPTION}</p>
+            </div>
+            {isLoading ? <p className="text-sm text-muted">Carregando pendências...</p> : null}
+            {!isLoading && !pendingItems.length ? <p className="text-sm text-muted">{RECURRENCES_PENDING_EMPTY_LABEL}</p> : null}
+          </section>
+        ) : (
+          <RecurrencePendingConfirmationsList
+            isSubmitting={isSubmitting}
+            items={pendingItems}
+            onCancel={onCancelPending}
+            onConfirm={onConfirmPending}
+          />
+        )
       ) : null}
 
       <section className="rounded-2xl border border-border bg-surface p-4 shadow-card">
