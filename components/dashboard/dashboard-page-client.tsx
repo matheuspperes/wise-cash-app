@@ -235,7 +235,7 @@ export function DashboardPageClient() {
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-base font-semibold">Limpeza de dados locais</h2>
-            <p className="text-sm text-muted">Remove transações e recorrências.</p>
+            <p className="text-sm text-muted">Remove transações, recorrências, instâncias de recorrência e metadados locais.</p>
           </div>
           <Button
             className="h-10 bg-danger px-4 text-sm text-white hover:brightness-110"
