@@ -84,6 +84,7 @@ export function DashboardPageClient() {
   );
 
   const transactionsHistoryHref = useMemo(() => "/transactions?view=history", []);
+  const recurrencesViewHref = useMemo(() => "/transactions?view=recurrences", []);
   const transactionsCreateHref = useMemo(() => "/transactions?view=new", []);
   const ctaPaddingClasses = "h-10 px-4 py-2 text-sm";
 
@@ -173,7 +174,15 @@ export function DashboardPageClient() {
           <div className="flex w-full flex-wrap items-center justify-end gap-2 md:w-auto md:gap-3">
             <Button
               asChild
-              className={`${ctaPaddingClasses} border border-[rgba(59,130,246,0.25)] bg-[rgba(59,130,246,0.12)] text-[var(--primary-cta)] shadow-card hover:bg-[rgba(59,130,246,0.18)]`}
+              className={`${ctaPaddingClasses} btn-visual-secondary`}
+              size="md"
+              variant="secondary"
+            >
+              <Link aria-label="Recorrências" href={recurrencesViewHref}>Recorrências</Link>
+            </Button>
+            <Button
+              asChild
+              className={`${ctaPaddingClasses} btn-visual-secondary`}
               size="md"
               variant="secondary"
             >
@@ -226,7 +235,7 @@ export function DashboardPageClient() {
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-base font-semibold">Limpeza de dados locais</h2>
-            <p className="text-sm text-muted">Remove transações, recorrências e metadados em todos os escopos locais.</p>
+            <p className="text-sm text-muted">Remove transações, recorrências, instâncias de recorrência e metadados locais.</p>
           </div>
           <Button
             className="h-10 bg-danger px-4 text-sm text-white hover:brightness-110"

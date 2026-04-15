@@ -8,12 +8,15 @@ type Props = {
   lines: readonly string[];
   className?: string;
   size?: "default" | "compact";
+  id?: string;
 };
 
-export function SimpleTooltip({ label, lines, className, size = "default" }: Props) {
+export function SimpleTooltip({ label, lines, className, size = "default", id }: Props) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const tooltipId = useId();
+  const generatedTooltipId = useId();
+  const tooltipId = id ?? generatedTooltipId;
+  const tooltipPanelId = `${tooltipId}-panel`;
 
   useEffect(() => {
     function onDocumentClick(event: MouseEvent) {
@@ -43,8 +46,9 @@ export function SimpleTooltip({ label, lines, className, size = "default" }: Pro
 
   return (
     <div className={cn("relative inline-flex", className)} ref={rootRef}>
+      <span className="sr-only" id={tooltipId}>{lines.join(" ")}</span>
       <button
-        aria-controls={tooltipId}
+        aria-controls={tooltipPanelId}
         aria-expanded={open}
         aria-label={label}
         className={cn(
@@ -60,7 +64,7 @@ export function SimpleTooltip({ label, lines, className, size = "default" }: Pro
       {open ? (
         <div
           className="absolute right-0 top-7 z-20 min-w-64 max-w-72 rounded-lg border border-border bg-surface p-3 text-xs text-foreground shadow-card"
-          id={tooltipId}
+          id={tooltipPanelId}
           role="tooltip"
         >
           {lines.map((line, index) => (

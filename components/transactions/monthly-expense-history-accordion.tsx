@@ -13,9 +13,10 @@ type Props = {
   isLoading?: boolean;
   onEditRow?: (row: MonthlyTransactionHistoryRow) => void;
   onDeleteRow?: (row: MonthlyTransactionHistoryRow) => Promise<void>;
+  onDeleteCancel?: () => void;
 };
 
-export function MonthlyExpenseHistoryAccordion({ groups, isLoading = false, onEditRow, onDeleteRow }: Props) {
+export function MonthlyExpenseHistoryAccordion({ groups, isLoading = false, onEditRow, onDeleteRow, onDeleteCancel }: Props) {
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   return (
@@ -75,7 +76,10 @@ export function MonthlyExpenseHistoryAccordion({ groups, isLoading = false, onEd
                               </button>
                               <button
                                 className="rounded px-2 py-1 text-xs text-muted hover:bg-surface"
-                                onClick={() => setPendingDeleteId(null)}
+                                onClick={() => {
+                                  setPendingDeleteId(null);
+                                  onDeleteCancel?.();
+                                }}
                                 type="button"
                               >
                                 Cancelar

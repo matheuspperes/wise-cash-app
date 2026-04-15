@@ -83,3 +83,32 @@ body {
     color: var(--foreground);
   }
 }
+
+@layer components {
+  .btn-visual-secondary {
+    border: 1px solid color-mix(in srgb, var(--secondary) 36%, transparent);
+    background: color-mix(in srgb, var(--secondary) 14%, transparent);
+    color: var(--foreground);
+    box-shadow: var(--shadow-card);
+    transition: background-color var(--duration-normal) ease, transform var(--duration-fast) ease;
+  }
+
+  .btn-visual-secondary:hover {
+    background: color-mix(in srgb, var(--secondary) 22%, transparent);
+    transform: translateY(-1px);
+  }
+
+  .recurrence-item-editing {
+    border-color: color-mix(in srgb, var(--primary) 65%, var(--border));
+    background: color-mix(in srgb, var(--surface-alt) 80%, var(--primary) 20%);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 35%, transparent);
+  }
+
+  .transaction-recurrence-grid {
+    align-items: start;
+  }
+
+  .transaction-recurrence-control {
+    min-height: 2.5rem;
+  }
+}
