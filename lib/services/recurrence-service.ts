@@ -383,7 +383,7 @@ export async function listRecurrenceRules(ownerScope = getActiveOwnerScope(), re
   const db = getDexieDb();
   const rules = await db.recurrenceRules
     .toCollection()
-    .filter((rule) => rule.ownerScope === ownerScope)
+    .filter((rule) => rule.ownerScope === ownerScope && rule.isActive)
     .toArray();
 
   return rules

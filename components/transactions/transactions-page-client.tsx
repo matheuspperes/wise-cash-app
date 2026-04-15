@@ -329,7 +329,7 @@ export default function TransactionsPageClient() {
       setIsSubmittingRecurrence(true);
       try {
         await confirmLocalRecurrencePending(id);
-        await Promise.all([loadRecurrences(), loadMonthlyHistory()]);
+        await loadMonthlyHistory();
         setRecurrenceError(null);
         window.dispatchEvent(new Event("wisecash:transactions-mutated"));
       } catch (error) {
@@ -342,7 +342,7 @@ export default function TransactionsPageClient() {
         setIsSubmittingRecurrence(false);
       }
     },
-    [loadRecurrences, loadMonthlyHistory],
+    [loadMonthlyHistory],
   );
 
   const handleCancelPendingRecurrence = useCallback(
@@ -350,7 +350,7 @@ export default function TransactionsPageClient() {
       setIsSubmittingRecurrence(true);
       try {
         await cancelLocalRecurrencePending(id);
-        await Promise.all([loadRecurrences(), loadMonthlyHistory()]);
+        await loadMonthlyHistory();
         setRecurrenceError(null);
         window.dispatchEvent(new Event("wisecash:transactions-mutated"));
       } catch (error) {
@@ -363,7 +363,7 @@ export default function TransactionsPageClient() {
         setIsSubmittingRecurrence(false);
       }
     },
-    [loadRecurrences, loadMonthlyHistory],
+    [loadMonthlyHistory],
   );
 
   const handleDeleteRecurrence = useCallback(
@@ -372,7 +372,7 @@ export default function TransactionsPageClient() {
       setIsSubmittingRecurrence(true);
       try {
         await deactivateLocalRecurrence(id);
-        await Promise.all([loadRecurrences(), loadMonthlyHistory()]);
+        await loadMonthlyHistory();
         setRecurrenceError(null);
         window.dispatchEvent(new Event("wisecash:transactions-mutated"));
       } catch (error) {
@@ -385,7 +385,7 @@ export default function TransactionsPageClient() {
         setIsSubmittingRecurrence(false);
       }
     },
-    [emitDeleteTelemetry, loadRecurrences, loadMonthlyHistory],
+    [emitDeleteTelemetry, loadMonthlyHistory],
   );
 
   const handleDeleteRecurrenceCancel = useCallback(() => {
@@ -401,7 +401,7 @@ export default function TransactionsPageClient() {
         maxCycles?: number;
         amount: number;
       },
-    ) => {
+    ): Promise<boolean> => {
       setIsSavingRecurrenceEdit(true);
       setRecurrenceEditError(null);
       try {
@@ -413,19 +413,21 @@ export default function TransactionsPageClient() {
             amount: payload.amount,
           },
         });
-        await Promise.all([loadRecurrences(), loadMonthlyHistory()]);
+        await loadMonthlyHistory();
         window.dispatchEvent(new Event("wisecash:transactions-mutated"));
+        return true;
       } catch (error) {
         if (error instanceof StorageUnavailableError) {
           setRecurrenceEditError("Armazenamento local indisponível. Não foi possível salvar a recorrência.");
         } else {
           setRecurrenceEditError("Não foi possível salvar a recorrência.");
         }
+        return false;
       } finally {
         setIsSavingRecurrenceEdit(false);
       }
     },
-    [loadRecurrences, loadMonthlyHistory],
+    [loadMonthlyHistory],
   );
 
   const renderTransactionRows = useCallback(
