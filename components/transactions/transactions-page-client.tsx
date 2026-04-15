@@ -44,6 +44,9 @@ type Tx = {
   transactionDate: string;
 };
 
+type DeleteTelemetryScope = "history" | "recurrences";
+type DeleteTelemetryAction = "confirm" | "cancel";
+
 function getRecurrenceStatusLabel(item: { recurrenceType: "limited" | "unlimited"; monthsRemaining: number | null }) {
   if (item.recurrenceType === "unlimited") {
     return "Ilimitada";
@@ -95,6 +98,10 @@ export default function TransactionsPageClient() {
   const recurrencesViewHref = "/transactions?view=recurrences";
 
   const historyStyleBase = "h-10 border border-border/80 bg-surface-alt text-foreground shadow-card hover:bg-surface";
+
+  const emitDeleteTelemetry = useCallback((scope: DeleteTelemetryScope, action: DeleteTelemetryAction) => {
+    window.dispatchEvent(new CustomEvent("wisecash:delete-action", { detail: { scope, action } }));
+  }, []);
 
   const load = useCallback(async () => {
     try {
@@ -250,6 +257,7 @@ export default function TransactionsPageClient() {
 
   const handleDelete = useCallback(
     async (row: MonthlyTransactionHistoryRow) => {
+      emitDeleteTelemetry("history", "confirm");
       try {
         await removeLocalTransaction(row.id);
         if (editingRow?.id === row.id) {
@@ -267,8 +275,12 @@ export default function TransactionsPageClient() {
         setRowActionError("Não foi possível excluir a transação.");
       }
     },
-    [editingRow?.id, load, loadMonthlyHistory],
+    [editingRow?.id, emitDeleteTelemetry, load, loadMonthlyHistory],
   );
+
+  const handleDeleteHistoryCancel = useCallback(() => {
+    emitDeleteTelemetry("history", "cancel");
+  }, [emitDeleteTelemetry]);
 
   const handleEditSave = useCallback(
     async (payload: {
@@ -356,11 +368,7 @@ export default function TransactionsPageClient() {
 
   const handleDeleteRecurrence = useCallback(
     async (id: string) => {
-      const confirmed = window.confirm("Desativar esta recorrência?");
-      if (!confirmed) {
-        return;
-      }
-
+      emitDeleteTelemetry("recurrences", "confirm");
       setIsSubmittingRecurrence(true);
       try {
         await deactivateLocalRecurrence(id);
@@ -377,8 +385,12 @@ export default function TransactionsPageClient() {
         setIsSubmittingRecurrence(false);
       }
     },
-    [loadRecurrences, loadMonthlyHistory],
+    [emitDeleteTelemetry, loadRecurrences, loadMonthlyHistory],
   );
+
+  const handleDeleteRecurrenceCancel = useCallback(() => {
+    emitDeleteTelemetry("recurrences", "cancel");
+  }, [emitDeleteTelemetry]);
 
   const handleSaveRecurrenceEdit = useCallback(
     async (
@@ -387,6 +399,7 @@ export default function TransactionsPageClient() {
         dayOfMonth: number;
         recurrenceType: "limited" | "unlimited";
         maxCycles?: number;
+        amount: number;
       },
     ) => {
       setIsSavingRecurrenceEdit(true);
@@ -396,6 +409,9 @@ export default function TransactionsPageClient() {
           dayOfMonth: payload.dayOfMonth,
           recurrenceType: payload.recurrenceType,
           maxCycles: payload.recurrenceType === "limited" ? payload.maxCycles : undefined,
+          template: {
+            amount: payload.amount,
+          },
         });
         await Promise.all([loadRecurrences(), loadMonthlyHistory()]);
         window.dispatchEvent(new Event("wisecash:transactions-mutated"));
@@ -479,6 +495,7 @@ export default function TransactionsPageClient() {
           isSubmitting={isSubmittingRecurrence}
           onCancelPending={handleCancelPendingRecurrence}
           onConfirmPending={handleConfirmPendingRecurrence}
+          onDeleteRecurrenceCancel={handleDeleteRecurrenceCancel}
           onDeleteRecurrence={handleDeleteRecurrence}
           onSaveEditRecurrence={handleSaveRecurrenceEdit}
           pendingItems={recurrencePendingItems}
@@ -553,6 +570,7 @@ export default function TransactionsPageClient() {
           <MonthlyExpenseHistoryAccordion
             groups={monthlyExpenseGroups}
             isLoading={isLoadingMonthlyHistory}
+            onDeleteCancel={handleDeleteHistoryCancel}
             onDeleteRow={handleDelete}
             onEditRow={(row) => {
               setEditingRow(row);

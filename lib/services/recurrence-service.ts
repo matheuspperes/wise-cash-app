@@ -70,6 +70,8 @@ export type RecurrenceRuleUpdateInput = {
   isActive?: boolean;
 };
 
+type PendingLike = Pick<RecurrencePendingItem, "id" | "dueDate" | "monthRef">;
+
 function toMonthRef(value: Date | string) {
   const date = value instanceof Date ? value : new Date(value);
   return date.toISOString().slice(0, 7);
@@ -88,6 +90,60 @@ function shiftMonthRef(monthRef: string, delta: number) {
 
 function compareMonthRef(left: string, right: string) {
   return left.localeCompare(right);
+}
+
+function parseLocalDateLike(value: string | Date) {
+  if (value instanceof Date) {
+    return value;
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split("-").map((item) => Number(item));
+    return new Date(year, month - 1, day);
+  }
+
+  return new Date(value);
+}
+
+function isValidDate(value: Date) {
+  return Number.isFinite(value.getTime());
+}
+
+export function isSameLocalMonthYear(dateLike: string | Date, referenceDate = new Date()) {
+  const date = parseLocalDateLike(dateLike);
+  if (!isValidDate(date)) {
+    return false;
+  }
+
+  return date.getFullYear() === referenceDate.getFullYear() && date.getMonth() === referenceDate.getMonth();
+}
+
+export function comparePendingRecurrenceItems(left: PendingLike, right: PendingLike) {
+  const leftDate = parseLocalDateLike(left.dueDate);
+  const rightDate = parseLocalDateLike(right.dueDate);
+
+  if (isValidDate(leftDate) && isValidDate(rightDate)) {
+    const timeDelta = leftDate.getTime() - rightDate.getTime();
+    if (timeDelta !== 0) {
+      return timeDelta;
+    }
+  }
+
+  const monthDelta = compareMonthRef(left.monthRef, right.monthRef);
+  if (monthDelta !== 0) {
+    return monthDelta;
+  }
+
+  return left.id.localeCompare(right.id);
+}
+
+export function filterPendingRecurrenceItemsForCurrentMonth(
+  items: RecurrencePendingItem[],
+  referenceDate = new Date(),
+) {
+  return items
+    .filter((item) => isSameLocalMonthYear(item.dueDate, referenceDate))
+    .sort(comparePendingRecurrenceItems);
 }
 
 function getLastDayOfMonth(year: number, monthIndex: number) {
@@ -356,9 +412,7 @@ export async function listPendingRecurrenceInstances(ownerScope = getActiveOwner
     .between([ownerScope, "pending", ""], [ownerScope, "pending", "9999-12"])
     .toArray();
 
-  return pending
-    .sort((a, b) => (a.monthRef < b.monthRef ? -1 : 1))
-    .map((item) => ({
+  const mapped = pending.map((item) => ({
       id: item.id,
       recurrenceRuleId: item.recurrenceRuleId,
       monthRef: item.monthRef,
@@ -369,6 +423,8 @@ export async function listPendingRecurrenceInstances(ownerScope = getActiveOwner
       amount: item.snapshotAmount,
       notes: item.snapshotNotes,
     }));
+
+  return mapped.sort(comparePendingRecurrenceItems);
 }
 
 export async function confirmPendingRecurrenceInstance(id: string, ownerScope = getActiveOwnerScope()) {

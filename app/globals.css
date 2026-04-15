@@ -97,4 +97,18 @@ body {
     background: color-mix(in srgb, var(--secondary) 22%, transparent);
     transform: translateY(-1px);
   }
+
+  .recurrence-item-editing {
+    border-color: color-mix(in srgb, var(--primary) 65%, var(--border));
+    background: color-mix(in srgb, var(--surface-alt) 80%, var(--primary) 20%);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 35%, transparent);
+  }
+
+  .transaction-recurrence-grid {
+    align-items: start;
+  }
+
+  .transaction-recurrence-control {
+    min-height: 2.5rem;
+  }
 }

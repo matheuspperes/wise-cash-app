@@ -5,6 +5,7 @@ import {
   cancelPendingRecurrenceInstance,
   confirmPendingRecurrenceInstance,
   deactivateRecurrenceRule,
+  filterPendingRecurrenceItemsForCurrentMonth,
   listPendingRecurrenceInstances,
   listRecurrenceRules,
   updateRecurrenceRuleForFutureCycles,
@@ -105,7 +106,7 @@ export async function listLocalRecurrencePendingConfirmations() {
     const ownerScope = getActiveOwnerScope();
     await reconcileAfterRecurrenceMutation(ownerScope);
     const items = await listPendingRecurrenceInstances(ownerScope);
-    return { items };
+    return { items: filterPendingRecurrenceItemsForCurrentMonth(items) };
   } catch (error) {
     return mapStorageError(error);
   }

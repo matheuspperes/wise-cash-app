@@ -214,3 +214,11 @@ Task: T035 [US3] Reposicionar tooltip do select de modo de recorrencia para fica
 - All story phases include mandatory manual validation tasks.
 - No automated tests are included by constitution.
 - Each task includes an explicit file path for direct execution.
+
+## Traceability Update (022-refine-recurrences-ux)
+
+- A feature `022-refine-recurrences-ux` refinou a UX desta entrega com:
+	- filtro de pendências por mês/ano local,
+	- paridade visual/fluxo de editar-excluir com histórico,
+	- remoção de copys proibidas,
+	- ajustes de tooltips acessíveis e alinhamento de grid no formulário.

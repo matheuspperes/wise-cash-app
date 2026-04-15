@@ -79,16 +79,18 @@ function mergeAndSortCategories(preset: readonly string[], custom: readonly stri
 function RecurrenceField({
   tooltipLabel,
   tooltipLines,
+  tooltipId,
   children,
 }: {
   tooltipLabel: string;
   tooltipLines: readonly string[];
+  tooltipId: string;
   children: ReactNode;
 }) {
   return (
     <div className="flex items-center gap-1.5">
       <div className="min-w-0 flex-1">{children}</div>
-      <SimpleTooltip className="shrink-0" label={tooltipLabel} lines={tooltipLines} size="compact" />
+      <SimpleTooltip className="shrink-0" id={tooltipId} label={tooltipLabel} lines={tooltipLines} size="compact" />
     </div>
   );
 }
@@ -97,8 +99,10 @@ export function TransactionForm({ onSaved }: Props) {
   const formId = useId();
   const recurrenceDayId = `tx-recurrence-day-${formId}`;
   const recurrenceTypeId = `tx-recurrence-type-${formId}`;
+  const recurrenceTypeTooltipId = `tx-recurrence-type-tooltip-${formId}`;
   const recurrenceMaxCyclesId = `tx-recurrence-maxcycles-${formId}`;
   const recurrenceModeId = `tx-recurrence-mode-${formId}`;
+  const recurrenceModeTooltipId = `tx-recurrence-mode-tooltip-${formId}`;
 
   const [customCategoriesByType, setCustomCategoriesByType] = useState<CustomCategoriesByType>({
     expense: [],
@@ -415,13 +419,14 @@ export function TransactionForm({ onSaved }: Props) {
           </div>
 
           {recurrenceEnabled ? (
-            <div className="mt-3 grid gap-3 md:grid-cols-2">
+            <div className="transaction-recurrence-grid mt-3 grid gap-3 md:grid-cols-2">
               <div>
                 <Controller
                   control={control}
                   name="recurrenceDayOfMonth"
                   render={({ field }) => (
                     <Input
+                      className="transaction-recurrence-control"
                       id={recurrenceDayId}
                       aria-describedby={errors.recurrenceDayOfMonth ? `${recurrenceDayId}-error` : undefined}
                       max={31}
@@ -441,6 +446,7 @@ export function TransactionForm({ onSaved }: Props) {
 
               <div>
                 <RecurrenceField
+                  tooltipId={recurrenceTypeTooltipId}
                   tooltipLabel="Explicação do tipo de recorrência"
                   tooltipLines={RECURRENCE_TYPE_TOOLTIP_LINES}
                 >
@@ -450,8 +456,11 @@ export function TransactionForm({ onSaved }: Props) {
                     render={({ field }) => (
                       <Select
                         id={recurrenceTypeId}
-                        aria-describedby={errors.recurrenceType ? `${recurrenceTypeId}-error` : undefined}
-                        className="w-full min-w-0 flex-1 md:max-w-[14rem]"
+                        aria-describedby={[
+                          recurrenceTypeTooltipId,
+                          errors.recurrenceType ? `${recurrenceTypeId}-error` : null,
+                        ].filter(Boolean).join(" ")}
+                        className="transaction-recurrence-control w-full min-w-0 flex-1 md:max-w-[14rem]"
                         onChange={(event) => {
                           const raw = event.target.value;
                           const nextType = raw === "" ? undefined : raw as "limited" | "unlimited";
@@ -482,6 +491,7 @@ export function TransactionForm({ onSaved }: Props) {
                     name="recurrenceMaxCycles"
                     render={({ field }) => (
                       <Input
+                        className="transaction-recurrence-control"
                         id={recurrenceMaxCyclesId}
                         aria-describedby={errors.recurrenceMaxCycles ? `${recurrenceMaxCyclesId}-error` : undefined}
                         min={1}
@@ -502,6 +512,7 @@ export function TransactionForm({ onSaved }: Props) {
               {recurrenceType === "unlimited" ? (
                 <div>
                   <RecurrenceField
+                    tooltipId={recurrenceModeTooltipId}
                     tooltipLabel="Explicação do modo de recorrência"
                     tooltipLines={RECURRENCE_MODE_TOOLTIP_LINES}
                   >
@@ -509,10 +520,13 @@ export function TransactionForm({ onSaved }: Props) {
                       control={control}
                       name="recurrenceUnlimitedMode"
                       render={({ field }) => (
-                        <Select className="w-full min-w-0 flex-1 md:max-w-[14rem]" onChange={(event) => {
+                        <Select className="transaction-recurrence-control w-full min-w-0 flex-1 md:max-w-[14rem]" onChange={(event) => {
                           const raw = event.target.value;
                           field.onChange(raw === "" ? undefined : raw as "automatic" | "manual");
-                        }} value={field.value ?? ""} id={recurrenceModeId} aria-describedby={errors.recurrenceUnlimitedMode ? `${recurrenceModeId}-error` : undefined}>
+                        }} value={field.value ?? ""} id={recurrenceModeId} aria-describedby={[
+                          recurrenceModeTooltipId,
+                          errors.recurrenceUnlimitedMode ? `${recurrenceModeId}-error` : null,
+                        ].filter(Boolean).join(" ")}>
                           <option value="">Modo da recorrência</option>
                           <option value="automatic">Automática</option>
                           <option value="manual">Manual</option>
