@@ -44,9 +44,10 @@ export function RecurrenceEditDrawer({
       return;
     }
 
+    const fallbackLimitedCycles = Math.max(recurrence.monthsRemaining ?? 1, 1);
     setDayOfMonthInput(String(recurrence.dayOfMonth));
     setRecurrenceType(recurrence.recurrenceType);
-    setMaxCyclesInput(String(recurrence.maxCycles ?? Math.max(recurrence.monthsRemaining ?? 1, 1)));
+    setMaxCyclesInput(String(recurrence.maxCycles ?? fallbackLimitedCycles));
     setAmountDisplay(formatBrlFromDigits(String(Math.round(recurrence.amount * 100))));
     setValidationError(null);
   }, [recurrence]);
@@ -104,6 +105,7 @@ export function RecurrenceEditDrawer({
 
           <form className="mt-4 grid gap-3" onSubmit={handleSubmit}>
             <Input
+              aria-label="Dia do mês"
               max={31}
               min={1}
               onChange={(event) => {
@@ -113,7 +115,9 @@ export function RecurrenceEditDrawer({
               type="number"
               value={dayOfMonthInput}
             />
+            <p className="-mt-2 text-xs text-muted">Em meses com menos dias, o lançamento usa o último dia disponível.</p>
             <Input
+              aria-label="Valor da recorrência"
               inputMode="numeric"
               onChange={(event) => {
                 const digits = event.target.value.replace(/\D/g, "");
@@ -124,6 +128,7 @@ export function RecurrenceEditDrawer({
               value={amountDisplay}
             />
             <Select
+              aria-label="Tipo de recorrência"
               onChange={(event) => {
                 const value = event.target.value === "limited" ? "limited" : "unlimited";
                 setRecurrenceType(value);
@@ -136,6 +141,7 @@ export function RecurrenceEditDrawer({
             </Select>
             {recurrenceType === "limited" ? (
               <Input
+                aria-label="Número máximo de ciclos"
                 min={1}
                 onChange={(event) => {
                   setMaxCyclesInput(event.target.value);
