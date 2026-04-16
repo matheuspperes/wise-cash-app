@@ -96,10 +96,8 @@ export default function TransactionsPageClient() {
   const historyViewHref = "/transactions?view=history";
   const newViewHref = "/transactions?view=new";
   const recurrencesViewHref = "/transactions?view=recurrences";
-  const isUiRoute = true;
-  const isDashboardRoute = false;
-  const showBackToDashboard = isUiRoute && !isDashboardRoute;
-  const showGlobalActions = isUiRoute;
+  const showBackToDashboard = true;
+  const showGlobalActions = true;
 
   const historyStyleBase = "h-10 border border-border/80 bg-surface-alt text-foreground shadow-card hover:bg-surface";
 
