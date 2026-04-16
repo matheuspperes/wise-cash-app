@@ -108,6 +108,16 @@ body {
     align-items: start;
   }
 
+  .transaction-recurrence-field {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .transaction-recurrence-tooltip {
+    flex-shrink: 0;
+  }
+
   .transaction-recurrence-control {
     min-height: 2.5rem;
   }

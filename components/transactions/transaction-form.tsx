@@ -88,9 +88,9 @@ function RecurrenceField({
   children: ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="transaction-recurrence-field">
       <div className="min-w-0 flex-1">{children}</div>
-      <SimpleTooltip className="shrink-0" id={tooltipId} label={tooltipLabel} lines={tooltipLines} size="compact" />
+      <SimpleTooltip className="transaction-recurrence-tooltip" id={tooltipId} label={tooltipLabel} lines={tooltipLines} size="compact" />
     </div>
   );
 }
@@ -276,7 +276,7 @@ export function TransactionForm({ onSaved }: Props) {
             control={control}
             name="type"
             render={({ field }) => (
-              <div className="grid grid-cols-2 gap-1 rounded-lg border border-border bg-surface-alt/60 p-1">
+              <div className="grid grid-cols-2 gap-1 rounded-lg border border-border bg-surface-alt/60 p-0">
                 <button
                   aria-pressed={field.value === "expense"}
                   className={field.value === "expense"
@@ -460,7 +460,7 @@ export function TransactionForm({ onSaved }: Props) {
                           recurrenceTypeTooltipId,
                           errors.recurrenceType ? `${recurrenceTypeId}-error` : null,
                         ].filter(Boolean).join(" ")}
-                        className="transaction-recurrence-control w-full min-w-0 flex-1 md:max-w-[14rem]"
+                        className="transaction-recurrence-control w-full min-w-0 flex-1"
                         onChange={(event) => {
                           const raw = event.target.value;
                           const nextType = raw === "" ? undefined : raw as "limited" | "unlimited";
@@ -520,7 +520,7 @@ export function TransactionForm({ onSaved }: Props) {
                       control={control}
                       name="recurrenceUnlimitedMode"
                       render={({ field }) => (
-                        <Select className="transaction-recurrence-control w-full min-w-0 flex-1 md:max-w-[14rem]" onChange={(event) => {
+                        <Select className="transaction-recurrence-control w-full min-w-0 flex-1" onChange={(event) => {
                           const raw = event.target.value;
                           field.onChange(raw === "" ? undefined : raw as "automatic" | "manual");
                         }} value={field.value ?? ""} id={recurrenceModeId} aria-describedby={[

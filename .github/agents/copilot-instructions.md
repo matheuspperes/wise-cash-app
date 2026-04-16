@@ -1,6 +1,6 @@
 ﻿# wise-cash-app Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-04-14
+Auto-generated from all feature plans. Last updated: 2026-04-15
 
 ## Active Technologies
 - TypeScript 5.x, Node.js 20+ (stack atual), Python 3.11+ quando aplicavel + Next.js 15.x, React 18, npm (operacao atual), uv (padrao para Python) (002-project-ambience-uv)
@@ -46,6 +46,7 @@ Auto-generated from all feature plans. Last updated: 2026-04-14
 - TypeScript 5.x, React 18, Next.js 15 (App Router) + Next.js, React Hook Form, Zod, TanStack Query, Dexie, (022-refine-recurrences-ux)
 - Persistencia local via Dexie/local repositories com owner scope (022-refine-recurrences-ux)
 - Persistencia local via repositories/gateway (local-finance e servicos locais) (022-refine-recurrences-ux)
+- Persistencia local (Dexie/repositories locais) (023-refine-recurrences-global-ux)
 
 - TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x) + Next.js, Tailwind CSS, Shadcn/UI, TanStack Query, Supabase JS, Recharts (001-monthly-finance-manager)
 
@@ -66,9 +67,9 @@ npm test; npm run lint
 TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x): Follow standard conventions
 
 ## Recent Changes
+- 023-refine-recurrences-global-ux: Added TypeScript 5.x, React 18, Next.js 15 (App Router) + Next.js, react-hook-form, zod, @tanstack/react-query, Tailwind CSS
 - 022-refine-recurrences-ux: Added TypeScript 5.x, React 18, Next.js 15 (App Router) + Next.js, react-hook-form, zod, @tanstack/react-query, Tailwind CSS
 - 022-refine-recurrences-ux: Added TypeScript 5.x, React 18, Next.js 15 (App Router) + Next.js, React Hook Form, Zod, TanStack Query, Dexie,
-- 020-add-recurrences-view: Added TypeScript 5.x, React 18, Next.js 15 (App Router) + Next.js, react-hook-form, zod, @tanstack/react-query, Tailwind CSS, Radix primitives
 
 
 <!-- MANUAL ADDITIONS START -->
