@@ -71,10 +71,27 @@ export type RecurrenceRuleUpdateInput = {
 };
 
 type PendingLike = Pick<RecurrencePendingItem, "id" | "dueDate" | "monthRef">;
+const CIVIL_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+function toTwoDigits(value: number) {
+  return String(value).padStart(2, "0");
+}
+
+function buildCivilDateFromParts(year: number, monthIndex: number, dayOfMonth: number) {
+  return `${year}-${toTwoDigits(monthIndex + 1)}-${toTwoDigits(dayOfMonth)}`;
+}
+
+function buildMonthRefFromParts(year: number, monthIndex: number) {
+  return `${year}-${toTwoDigits(monthIndex + 1)}`;
+}
 
 function toMonthRef(value: Date | string) {
-  const date = value instanceof Date ? value : new Date(value);
-  return date.toISOString().slice(0, 7);
+  const date = parseLocalDateLike(value);
+  if (!isValidDate(date)) {
+    throw new Error("Data invalida para monthRef de recorrencia.");
+  }
+
+  return buildMonthRefFromParts(date.getFullYear(), date.getMonth());
 }
 
 function monthRefToDate(monthRef: string) {
@@ -97,7 +114,7 @@ function parseLocalDateLike(value: string | Date) {
     return value;
   }
 
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+  if (CIVIL_DATE_REGEX.test(value)) {
     const [year, month, day] = value.split("-").map((item) => Number(item));
     return new Date(year, month - 1, day);
   }
@@ -107,6 +124,45 @@ function parseLocalDateLike(value: string | Date) {
 
 function isValidDate(value: Date) {
   return Number.isFinite(value.getTime());
+}
+
+function parseStrictCivilDate(value: string) {
+  if (!CIVIL_DATE_REGEX.test(value)) {
+    return null;
+  }
+
+  const [year, month, day] = value.split("-").map((item) => Number(item));
+  const date = new Date(year, month - 1, day);
+
+  if (!isValidDate(date)) {
+    return null;
+  }
+
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    return null;
+  }
+
+  return date;
+}
+
+export function normalizeRecurrenceCivilDate(value: string | Date) {
+  if (typeof value === "string") {
+    const civilDate = parseStrictCivilDate(value);
+    if (civilDate) {
+      return buildCivilDateFromParts(civilDate.getFullYear(), civilDate.getMonth(), civilDate.getDate());
+    }
+
+    if (CIVIL_DATE_REGEX.test(value)) {
+      throw new Error("Data invalida para recorrencia.");
+    }
+  }
+
+  const date = parseLocalDateLike(value);
+  if (!isValidDate(date)) {
+    throw new Error("Data invalida para recorrencia.");
+  }
+
+  return buildCivilDateFromParts(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
 export function isSameLocalMonthYear(dateLike: string | Date, referenceDate = new Date()) {
@@ -155,8 +211,7 @@ function resolveDueDate(monthRef: string, dayOfMonth: number) {
   const monthIndex = month - 1;
   const lastDay = getLastDayOfMonth(year, monthIndex);
   const resolvedDay = Math.min(dayOfMonth, lastDay);
-  const date = new Date(Date.UTC(year, monthIndex, resolvedDay));
-  return date.toISOString().slice(0, 10);
+  return normalizeRecurrenceCivilDate(new Date(year, monthIndex, resolvedDay));
 }
 
 function toEffectiveMonthRef(date = new Date()) {
@@ -325,7 +380,7 @@ export async function createRecurrenceRule(input: RecurrenceRuleInput, ownerScop
     templateCategoryName: input.template.categoryName,
     templateAmount: input.template.amount,
     templateNotes: input.template.notes,
-    startDate: input.template.startDate,
+    startDate: normalizeRecurrenceCivilDate(input.template.startDate),
     isActive: true,
     createdAt: now,
     updatedAt: now,

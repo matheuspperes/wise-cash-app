@@ -96,6 +96,8 @@ export default function TransactionsPageClient() {
   const historyViewHref = "/transactions?view=history";
   const newViewHref = "/transactions?view=new";
   const recurrencesViewHref = "/transactions?view=recurrences";
+  const showBackToDashboard = true;
+  const showGlobalActions = true;
 
   const historyStyleBase = "h-10 border border-border/80 bg-surface-alt text-foreground shadow-card hover:bg-surface";
 
@@ -471,18 +473,24 @@ export default function TransactionsPageClient() {
       <DashboardHeader
         controls={(
           <div className="flex w-full flex-wrap items-center justify-end gap-2 md:w-auto md:gap-3">
-            <Button asChild className={historyStyleBase} size="md" variant="secondary">
-              <Link href="/">Voltar ao Dashboard</Link>
-            </Button>
-            <Button asChild className={historyStyleBase} size="md" variant="secondary">
-              <Link href={historyViewHref}>Histórico</Link>
-            </Button>
-            <Button asChild className={historyStyleBase} size="md" variant="secondary">
-              <Link href={recurrencesViewHref}>Recorrências</Link>
-            </Button>
-            <Button asChild className="h-10 bg-[var(--primary-cta)] px-4 text-sm text-white shadow-elevated hover:brightness-110" size="md">
-              <Link href={newViewHref}>Nova Transação</Link>
-            </Button>
+            {showBackToDashboard ? (
+              <Button asChild className={historyStyleBase} size="md" variant="secondary">
+                <Link href="/">Voltar ao Dashboard</Link>
+              </Button>
+            ) : null}
+            {showGlobalActions ? (
+              <>
+                <Button asChild className={historyStyleBase} size="md" variant="secondary">
+                  <Link href={historyViewHref}>Transações</Link>
+                </Button>
+                <Button asChild className={historyStyleBase} size="md" variant="secondary">
+                  <Link href={recurrencesViewHref}>Recorrências</Link>
+                </Button>
+                <Button asChild className="h-10 bg-[var(--primary-cta)] px-4 text-sm text-white shadow-elevated hover:brightness-110" size="md">
+                  <Link href={newViewHref}>Nova Transação</Link>
+                </Button>
+              </>
+            ) : null}
           </div>
         )}
         title={uiText.transactions}
@@ -530,12 +538,6 @@ export default function TransactionsPageClient() {
               </div>
             </section>
           ) : null}
-
-          <div className="-mt-1 text-right text-sm text-muted">
-            <Button asChild className={historyStyleBase} size="md" variant="secondary">
-              <Link href={historyViewHref}>Ver histórico de transações</Link>
-            </Button>
-          </div>
         </>
       ) : null}
 
@@ -580,12 +582,6 @@ export default function TransactionsPageClient() {
               setEditSuccessMessage(null);
             }}
           />
-          <div className="pt-1 text-right">
-            <Button asChild className="h-10 bg-[var(--primary-cta)] px-4 text-sm text-white shadow-elevated hover:brightness-110" size="md">
-              <Link href={newViewHref}>Nova Transação</Link>
-            </Button>
-          </div>
-
           <TransactionHistoryEditDrawer
             errorMessage={editErrorMessage}
             isOpen={Boolean(editingRow)}
