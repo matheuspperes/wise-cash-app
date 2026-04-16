@@ -125,7 +125,37 @@ function isValidDate(value: Date) {
   return Number.isFinite(value.getTime());
 }
 
+function parseStrictCivilDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return null;
+  }
+
+  const [year, month, day] = value.split("-").map((item) => Number(item));
+  const date = new Date(year, month - 1, day);
+
+  if (!isValidDate(date)) {
+    return null;
+  }
+
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    return null;
+  }
+
+  return date;
+}
+
 export function normalizeRecurrenceCivilDate(value: string | Date) {
+  if (typeof value === "string") {
+    const civilDate = parseStrictCivilDate(value);
+    if (civilDate) {
+      return buildCivilDateFromParts(civilDate.getFullYear(), civilDate.getMonth(), civilDate.getDate());
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      throw new Error("Data invalida para recorrencia.");
+    }
+  }
+
   const date = parseLocalDateLike(value);
   if (!isValidDate(date)) {
     throw new Error("Data invalida para recorrencia.");
