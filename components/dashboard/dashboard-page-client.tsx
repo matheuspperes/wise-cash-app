@@ -159,7 +159,7 @@ export function DashboardPageClient() {
                   size="md"
                   variant="secondary"
                 >
-                  <Link aria-label="Recorrências" href={recurrencesViewHref}>Recorrências</Link>
+                  <Link aria-label="Transações" href={transactionsHistoryHref}>Transações</Link>
                 </Button>
                 <Button
                   asChild
@@ -167,7 +167,7 @@ export function DashboardPageClient() {
                   size="md"
                   variant="secondary"
                 >
-                  <Link aria-label="Transações" href={transactionsHistoryHref}>Transações</Link>
+                  <Link aria-label="Recorrências" href={recurrencesViewHref}>Recorrências</Link>
                 </Button>
                 <Button asChild className={`${ctaPaddingClasses} bg-[var(--primary-cta)] text-white shadow-elevated hover:brightness-110`} size="md">
                   <Link aria-label="Nova Transação" href={transactionsCreateHref}>Nova Transação</Link>

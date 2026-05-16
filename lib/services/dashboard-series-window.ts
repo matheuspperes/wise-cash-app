@@ -1,10 +1,6 @@
 import { MonthlyPoint } from "@/lib/repositories/monthly-summary-repository";
+import { toLocalCivilMonthRef } from "@/lib/formatting/civil-date";
 import { DashboardViewMode } from "@/lib/ui/dashboard-view-mode";
-
-function toMonthRef(value: Date | string) {
-  const date = value instanceof Date ? value : new Date(value);
-  return date.toISOString().slice(0, 7);
-}
 
 function monthRefToDate(monthRef: string) {
   const [year, month] = monthRef.split("-").map((item) => Number(item));
@@ -19,7 +15,7 @@ function shiftMonthRef(monthRef: string, delta: number) {
 
 export function selectSeriesWindowByMode(series: MonthlyPoint[], months: number, mode: DashboardViewMode, referenceDate = new Date()) {
   const safeMonths = Math.max(1, Math.floor(months));
-  const currentMonthRef = toMonthRef(referenceDate);
+  const currentMonthRef = toLocalCivilMonthRef(referenceDate);
 
   const from = mode === "historico" ? shiftMonthRef(currentMonthRef, -(safeMonths - 1)) : currentMonthRef;
   const to = mode === "historico" ? currentMonthRef : shiftMonthRef(currentMonthRef, safeMonths - 1);

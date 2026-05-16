@@ -121,4 +121,27 @@ body {
   .transaction-recurrence-control {
     min-height: 2.5rem;
   }
+
+  .transaction-history-current-month {
+    border-color: color-mix(in srgb, var(--accent) 20%, var(--border));
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+
+  .recurrence-toggle-off {
+    color: var(--muted);
+    background: var(--surface);
+  }
+
+  .recurrence-toggle-off:hover {
+    background: color-mix(in srgb, var(--surface-alt) 60%, transparent);
+  }
+
+  .recurrence-toggle-on {
+    color: #a7f3d0;
+    background: rgba(34, 197, 94, 0.2);
+  }
+
+  .recurrence-toggle-on:hover {
+    background: rgba(34, 197, 94, 0.28);
+  }
 }

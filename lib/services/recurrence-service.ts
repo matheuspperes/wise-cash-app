@@ -7,6 +7,8 @@ import {
   TxType,
 } from "@/lib/repositories/local-finance-contracts";
 import { createTransaction, updateTransaction } from "@/lib/repositories/transaction-repository";
+import { ensureCivilDateNormalization } from "@/lib/services/civil-date-migration";
+import { buildCivilDateFromParts as buildCivilDateString, buildCivilMonthRefFromParts as buildCivilMonthRefString, normalizeCivilDateString, toLocalCivilDate, toLocalCivilMonthRef } from "@/lib/formatting/civil-date";
 import { getDexieDb } from "@/lib/storage/dexie-db";
 import { assertLocalStorageAvailable } from "@/lib/storage/local-storage-health";
 import { getActiveOwnerScope } from "@/lib/storage/scoped-db";
@@ -72,36 +74,20 @@ export type RecurrenceRuleUpdateInput = {
 
 type PendingLike = Pick<RecurrencePendingItem, "id" | "dueDate" | "monthRef">;
 
-function toTwoDigits(value: number) {
-  return String(value).padStart(2, "0");
-}
-
-function buildCivilDateFromParts(year: number, monthIndex: number, dayOfMonth: number) {
-  return `${year}-${toTwoDigits(monthIndex + 1)}-${toTwoDigits(dayOfMonth)}`;
-}
-
 function buildMonthRefFromParts(year: number, monthIndex: number) {
-  return `${year}-${toTwoDigits(monthIndex + 1)}`;
+  return buildCivilMonthRefString(year, monthIndex);
 }
 
 function toMonthRef(value: Date | string) {
-  const date = parseLocalDateLike(value);
-  if (!isValidDate(date)) {
-    throw new Error("Data invalida para monthRef de recorrencia.");
-  }
-
-  return buildMonthRefFromParts(date.getFullYear(), date.getMonth());
-}
-
-function monthRefToDate(monthRef: string) {
-  const [year, month] = monthRef.split("-").map((item) => Number(item));
-  return new Date(year, month - 1, 1);
+  return toLocalCivilMonthRef(value);
 }
 
 function shiftMonthRef(monthRef: string, delta: number) {
-  const date = monthRefToDate(monthRef);
-  date.setMonth(date.getMonth() + delta);
-  return toMonthRef(date);
+  const [year, month] = monthRef.split("-").map((item) => Number(item));
+  const totalMonths = year * 12 + (month - 1) + delta;
+  const nextYear = Math.floor(totalMonths / 12);
+  const nextMonthIndex = ((totalMonths % 12) + 12) % 12;
+  return buildMonthRefFromParts(nextYear, nextMonthIndex);
 }
 
 function compareMonthRef(left: string, right: string) {
@@ -109,16 +95,7 @@ function compareMonthRef(left: string, right: string) {
 }
 
 function parseLocalDateLike(value: string | Date) {
-  if (value instanceof Date) {
-    return value;
-  }
-
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    const [year, month, day] = value.split("-").map((item) => Number(item));
-    return new Date(year, month - 1, day);
-  }
-
-  return new Date(value);
+  return toLocalCivilDate(value);
 }
 
 function isValidDate(value: Date) {
@@ -126,12 +103,7 @@ function isValidDate(value: Date) {
 }
 
 export function normalizeRecurrenceCivilDate(value: string | Date) {
-  const date = parseLocalDateLike(value);
-  if (!isValidDate(date)) {
-    throw new Error("Data invalida para recorrencia.");
-  }
-
-  return buildCivilDateFromParts(date.getFullYear(), date.getMonth(), date.getDate());
+  return normalizeCivilDateString(value);
 }
 
 export function isSameLocalMonthYear(dateLike: string | Date, referenceDate = new Date()) {
@@ -172,7 +144,13 @@ export function filterPendingRecurrenceItemsForCurrentMonth(
 }
 
 function getLastDayOfMonth(year: number, monthIndex: number) {
-  return new Date(year, monthIndex + 1, 0).getDate();
+  if (monthIndex === 1) {
+    const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+    return isLeapYear ? 29 : 28;
+  }
+
+  const monthLengths = [31, 0, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return monthLengths[monthIndex];
 }
 
 function resolveDueDate(monthRef: string, dayOfMonth: number) {
@@ -180,7 +158,7 @@ function resolveDueDate(monthRef: string, dayOfMonth: number) {
   const monthIndex = month - 1;
   const lastDay = getLastDayOfMonth(year, monthIndex);
   const resolvedDay = Math.min(dayOfMonth, lastDay);
-  return normalizeRecurrenceCivilDate(new Date(year, monthIndex, resolvedDay));
+  return buildCivilDateString(year, monthIndex, resolvedDay);
 }
 
 function toEffectiveMonthRef(date = new Date()) {
@@ -330,6 +308,7 @@ async function updateRuleProgress(rule: RecurrenceRuleRecord) {
 
 export async function createRecurrenceRule(input: RecurrenceRuleInput, ownerScope = getActiveOwnerScope()): Promise<RecurrenceRuleRecord> {
   assertLocalStorageAvailable();
+  await ensureCivilDateNormalization(ownerScope);
 
   const now = new Date().toISOString();
   const db = getDexieDb();
@@ -361,6 +340,7 @@ export async function createRecurrenceRule(input: RecurrenceRuleInput, ownerScop
 
 export async function reconcileRecurrence(ownerScope = getActiveOwnerScope(), referenceDate = new Date()) {
   assertLocalStorageAvailable();
+  await ensureCivilDateNormalization(ownerScope);
   const db = getDexieDb();
   const activeRules = await db.recurrenceRules
     .toCollection()
@@ -404,6 +384,7 @@ export async function reconcileRecurrence(ownerScope = getActiveOwnerScope(), re
 
 export async function listRecurrenceRules(ownerScope = getActiveOwnerScope(), referenceDate = new Date()): Promise<RecurrenceRuleListItem[]> {
   assertLocalStorageAvailable();
+  await ensureCivilDateNormalization(ownerScope);
   const db = getDexieDb();
   const rules = await db.recurrenceRules
     .toCollection()
@@ -430,6 +411,7 @@ export async function listRecurrenceRules(ownerScope = getActiveOwnerScope(), re
 
 export async function listPendingRecurrenceInstances(ownerScope = getActiveOwnerScope()): Promise<RecurrencePendingItem[]> {
   assertLocalStorageAvailable();
+  await ensureCivilDateNormalization(ownerScope);
   const db = getDexieDb();
   const pending = await db.recurrenceInstances
     .where("[ownerScope+status+monthRef]")
@@ -453,6 +435,7 @@ export async function listPendingRecurrenceInstances(ownerScope = getActiveOwner
 
 export async function confirmPendingRecurrenceInstance(id: string, ownerScope = getActiveOwnerScope()) {
   assertLocalStorageAvailable();
+  await ensureCivilDateNormalization(ownerScope);
   const db = getDexieDb();
 
   return await db.transaction("rw", [db.recurrenceInstances, db.transactions], async () => {
@@ -498,6 +481,7 @@ export async function confirmPendingRecurrenceInstance(id: string, ownerScope = 
 
 export async function cancelPendingRecurrenceInstance(id: string, ownerScope = getActiveOwnerScope()) {
   assertLocalStorageAvailable();
+  await ensureCivilDateNormalization(ownerScope);
   const db = getDexieDb();
 
   return await db.transaction("rw", db.recurrenceInstances, async () => {
@@ -528,6 +512,7 @@ export async function updateRecurrenceRuleForFutureCycles(
   effectiveFromMonthRef = toEffectiveMonthRef(),
 ) {
   assertLocalStorageAvailable();
+  await ensureCivilDateNormalization(ownerScope);
   const db = getDexieDb();
   const current = await db.recurrenceRules.get(recurrenceRuleId);
   if (!current || current.ownerScope !== ownerScope) {

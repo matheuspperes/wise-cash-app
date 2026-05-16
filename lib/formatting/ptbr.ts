@@ -1,3 +1,5 @@
+import { toLocalCivilDate, toLocalCivilMonthRef } from "@/lib/formatting/civil-date";
+
 export function formatCurrencyBRL(value: number): string {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -6,12 +8,12 @@ export function formatCurrencyBRL(value: number): string {
 }
 
 export function formatDateBR(date: string | Date): string {
-  const parsed = typeof date === "string" ? new Date(date) : date;
+  const parsed = typeof date === "string" ? toLocalCivilDate(date) : date;
   return new Intl.DateTimeFormat("pt-BR").format(parsed);
 }
 
 export function formatMonthLabel(date: string | Date): string {
-  const parsed = typeof date === "string" ? new Date(date) : date;
+  const parsed = typeof date === "string" ? toLocalCivilDate(date) : date;
   return new Intl.DateTimeFormat("pt-BR", {
     month: "short",
     year: "numeric",
@@ -37,10 +39,7 @@ export function formatMonthYearLabel(value: string): string {
 }
 
 export function toMonthRef(date: string | Date): string {
-  const parsed = typeof date === "string" ? new Date(date) : date;
-  const year = parsed.getFullYear();
-  const month = String(parsed.getMonth() + 1).padStart(2, "0");
-  return `${year}-${month}`;
+  return toLocalCivilMonthRef(date);
 }
 
 export function formatMonthRefLabel(monthRef: string): string {

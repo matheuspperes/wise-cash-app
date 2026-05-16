@@ -198,6 +198,20 @@ cython_debug/
 #  exclude from AI features like autocomplete and code analysis. Recommended for sensitive data
 #  refer to https://docs.cursor.com/context/ignore-files
 
+# Node/Next.js
+node_modules/
+.next/
+dist/
+build/
+*.log
+.env*
+
+# IDEs and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
 # Node.js / Next.js
 node_modules/
 .next/

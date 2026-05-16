@@ -2,15 +2,11 @@ import { getMonthlySummaryContext, listCurrentMonthTransactions, listFullTransac
 import { buildHistoricalTotalBalance, buildMonthlyTransactionHistoryGroups } from "@/lib/services/dashboard-history-mapper";
 import { selectSeriesWindowByMode } from "@/lib/services/dashboard-series-window";
 import { listPendingRecurrenceInstances, reconcileRecurrence } from "@/lib/services/recurrence-service";
+import { toLocalCivilMonthRef } from "@/lib/formatting/civil-date";
 import { clearLocalFunctionalData } from "@/lib/storage/dexie-db";
 import { StorageUnavailableError, assertLocalStorageAvailable } from "@/lib/storage/local-storage-health";
 import { getActiveOwnerScope } from "@/lib/storage/scoped-db";
 import { DASHBOARD_VIEW_MODE_DEFAULT, DashboardViewMode } from "@/lib/ui/dashboard-view-mode";
-
-function toMonthRef(value: Date | string) {
-  const date = value instanceof Date ? value : new Date(value);
-  return date.toISOString().slice(0, 7);
-}
 
 function mapStorageError(error: unknown): never {
   if (error instanceof StorageUnavailableError) {
@@ -47,7 +43,7 @@ export async function getLocalDashboardSummary(months: number, mode: DashboardVi
     const ownerScope = getActiveOwnerScope();
     await reconcileRecurrence(ownerScope);
     const summaryContext = await getMonthlySummaryContext(null, ownerScope);
-    const currentMonthRef = toMonthRef(new Date());
+    const currentMonthRef = toLocalCivilMonthRef(new Date());
     const currentMonthPoint = summaryContext.series.find((point) => point.monthRef === currentMonthRef) ?? {
       monthRef: currentMonthRef,
       month: "",
