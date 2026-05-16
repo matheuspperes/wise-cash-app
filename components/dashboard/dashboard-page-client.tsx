@@ -83,10 +83,8 @@ export function DashboardPageClient() {
   const transactionsHistoryHref = useMemo(() => "/transactions?view=history", []);
   const recurrencesViewHref = useMemo(() => "/transactions?view=recurrences", []);
   const transactionsCreateHref = useMemo(() => "/transactions?view=new", []);
-  const isUiRoute = true;
-  const isDashboardRoute = true;
-  const showGlobalActions = isUiRoute;
-  const showBackToDashboard = isUiRoute && !isDashboardRoute;
+  const showGlobalActions = true;
+  const showBackToDashboard = false;
   const ctaPaddingClasses = "h-10 px-4 py-2 text-sm";
 
   useEffect(() => {
