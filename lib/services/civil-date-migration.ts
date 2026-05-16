@@ -32,7 +32,7 @@ export function ensureCivilDateMigration<T extends TransactionWithDate>(records:
   return migrateTransactionsCivilDates(records);
 }
 
-export async function runCivilDateMigration<T extends TransactionWithDate>(records: T[] = []) {
+export function runCivilDateMigration<T extends TransactionWithDate>(records: T[] = []) {
   return ensureCivilDateMigration(records);
 }
 
