@@ -1,5 +1,6 @@
 import Dexie, { type Table } from "dexie";
 
+import { toLocalCivilDateString } from "@/lib/formatting/civil-date";
 import { MetaRecord, RecurrenceInstanceRecord, RecurrenceRuleRecord, TransactionRecord } from "@/lib/repositories/local-finance-contracts";
 
 class WiseCashDexieDatabase extends Dexie {
@@ -40,7 +41,7 @@ class WiseCashDexieDatabase extends Dexie {
           rule.templateCategoryId = rule.templateCategoryId ?? "Outros";
           rule.templateCategoryName = rule.templateCategoryName ?? "Outros";
           rule.templateAmount = rule.templateAmount ?? 0;
-          rule.startDate = rule.startDate ?? new Date().toISOString().slice(0, 10);
+          rule.startDate = rule.startDate ?? toLocalCivilDateString();
           rule.updatedAt = new Date().toISOString();
         });
       });
