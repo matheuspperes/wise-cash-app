@@ -10,7 +10,7 @@ function monthRefToDate(monthRef: string) {
 function shiftMonthRef(monthRef: string, delta: number) {
   const date = monthRefToDate(monthRef);
   date.setMonth(date.getMonth() + delta);
-  return toMonthRef(date);
+  return toLocalCivilMonthRef(date);
 }
 
 export function selectSeriesWindowByMode(series: MonthlyPoint[], months: number, mode: DashboardViewMode, referenceDate = new Date()) {
