@@ -83,6 +83,7 @@ export function DashboardPageClient() {
   const transactionsHistoryHref = useMemo(() => "/transactions?view=history", []);
   const recurrencesViewHref = useMemo(() => "/transactions?view=recurrences", []);
   const transactionsCreateHref = useMemo(() => "/transactions?view=new", []);
+  const dataViewHref = useMemo(() => "/data", []);
   const showGlobalActions = true;
   const showBackToDashboard = false;
   const ctaPaddingClasses = "h-10 px-4 py-2 text-sm";
@@ -151,6 +152,14 @@ export function DashboardPageClient() {
           <div className="flex w-full flex-wrap items-center justify-end gap-2 md:w-auto md:gap-3">
             {showGlobalActions ? (
               <>
+                <Button
+                  asChild
+                  className={`${ctaPaddingClasses} btn-visual-secondary`}
+                  size="md"
+                  variant="secondary"
+                >
+                  <Link aria-label="Dados" href={dataViewHref}>Dados</Link>
+                </Button>
                 <Button
                   asChild
                   className={`${ctaPaddingClasses} btn-visual-secondary`}

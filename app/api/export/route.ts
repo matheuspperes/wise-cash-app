@@ -22,12 +22,38 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  const header = "id,name,type,categoryName,amount,transactionDate,notes";
-  const rows = items.map((item) =>
-    [item.id, item.name, item.type, item.categoryName, item.amount, item.transactionDate, item.notes ?? ""]
-      .map((v) => `\"${String(v).replace(/\"/g, "\"\"")}\"`)
-      .join(","),
-  );
+  const header = [
+    "Nome",
+    "Tipo",
+    "Categoria",
+    "Valor",
+    "Data",
+    "Observacoes",
+    "Recorrencia Ativa",
+    "Dia da Recorrencia",
+    "Tipo da Recorrencia",
+    "Quantidade de Meses",
+    "Modo da Recorrencia",
+  ].join(",");
+
+  const rows = items.map((item) => {
+    const tipo = item.type === "income" ? "Receita" : "Despesa";
+    const row = [
+      item.name,
+      tipo,
+      item.categoryName,
+      Number(item.amount).toFixed(2),
+      item.transactionDate,
+      item.notes ?? "",
+      "Nao",
+      "",
+      "",
+      "",
+      "",
+    ];
+
+    return row.map((v) => `\"${String(v).replace(/\"/g, "\"\"")}\"`).join(",");
+  });
   const csv = [header, ...rows].join("\n");
 
   return new NextResponse(csv, {
