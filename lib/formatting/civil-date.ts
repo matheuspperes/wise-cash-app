@@ -32,7 +32,8 @@ export function parseLocalDateLike(value: string | Date) {
       return new Date(Number.NaN);
     }
 
-    return new Date(year, month - 1, 1);
+    const date = new Date(year, month - 1, 1);
+    return isSameDateParts(date, year, month - 1, 1) ? date : new Date(Number.NaN);
   }
 
   return new Date(value);
