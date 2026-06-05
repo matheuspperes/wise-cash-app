@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
 import { SimpleTooltip } from "@/components/ui/simple-tooltip";
 import { extractDigits, formatBrlFromDigits, parseBrlDisplayToAmount } from "@/lib/formatting/brl-currency-mask";
+import { toLocalCivilDateString } from "@/lib/formatting/civil-date";
 import { uiText } from "@/lib/i18n/ui-text";
 import { createLocalTransaction } from "@/lib/services/local-transactions-gateway";
 import { StorageUnavailableError } from "@/lib/storage/local-storage-health";
@@ -67,7 +68,7 @@ type Props = {
   onSaved?: (transaction: SavedTransactionPayload) => void | Promise<void>;
 };
 
-const today = new Date().toISOString().slice(0, 10);
+const today = toLocalCivilDateString();
 const CREATE_NEW_OPTION_VALUE = "__create_new_category__";
 
 type CustomCategoriesByType = Record<TransactionType, string[]>;
@@ -398,6 +399,7 @@ export function TransactionForm({ onSaved }: Props) {
               name="recurrenceEnabled"
               render={({ field }) => (
                 <Button
+                  className={`rounded-md px-3 py-2 text-sm font-semibold ${field.value ? "recurrence-toggle-on" : "recurrence-toggle-off"}`}
                   onClick={() => {
                     const nextEnabled = !field.value;
                     field.onChange(nextEnabled);
@@ -412,7 +414,7 @@ export function TransactionForm({ onSaved }: Props) {
                   type="button"
                   variant={field.value ? "primary" : "secondary"}
                 >
-                  {field.value ? "Recorrência: Ligada" : "Recorrência: Desligada"}
+                  {field.value ? "Ligado" : "Desligado"}
                 </Button>
               )}
             />

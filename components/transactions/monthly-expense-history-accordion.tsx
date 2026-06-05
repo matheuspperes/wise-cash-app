@@ -16,8 +16,14 @@ type Props = {
   onDeleteCancel?: () => void;
 };
 
+function buildMonthRef(date = new Date()) {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${date.getFullYear()}-${month}`;
+}
+
 export function MonthlyExpenseHistoryAccordion({ groups, isLoading = false, onEditRow, onDeleteRow, onDeleteCancel }: Props) {
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const currentMonthRef = buildMonthRef();
 
   return (
     <section className="rounded-2xl border border-border bg-surface p-5 shadow-card">
@@ -30,8 +36,14 @@ export function MonthlyExpenseHistoryAccordion({ groups, isLoading = false, onEd
         <p className="text-sm text-muted">{uiText.fullHistoryEmpty}</p>
       ) : (
         <div className="space-y-3">
-          {groups.map((group) => (
-            <details className="rounded-xl border border-border bg-surface-alt/30" key={group.monthRef} open={!group.isCollapsedByDefault}>
+          {groups.map((group) => {
+            const isCurrentMonth = group.monthRef === currentMonthRef;
+            return (
+              <details
+                className={`rounded-xl border border-border bg-surface-alt/30 ${isCurrentMonth ? "transaction-history-current-month" : ""}`}
+                key={group.monthRef}
+                open={!group.isCollapsedByDefault}
+              >
               <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold tracking-wide text-foreground">
                 <div className="flex items-center justify-between gap-3">
                   <span>{group.monthLabel}</span>
@@ -112,7 +124,8 @@ export function MonthlyExpenseHistoryAccordion({ groups, isLoading = false, onEd
                 </table>
               </div>
             </details>
-          ))}
+            );
+          })}
         </div>
       )}
     </section>

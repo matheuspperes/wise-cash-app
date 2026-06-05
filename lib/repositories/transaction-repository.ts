@@ -1,10 +1,12 @@
 import { TransactionListParams, TransactionRecord } from "@/lib/repositories/local-finance-contracts";
 import { normalizeTextForSearch } from "@/lib/repositories/text-normalization";
+import { normalizeCivilDateString } from "@/lib/formatting/civil-date";
 import { categoryMatchesFilter, correctCategoryLabel } from "@/lib/ui/category-label-corrections";
 import Dexie from "dexie";
 import { getDexieDb } from "@/lib/storage/dexie-db";
 import { assertLocalStorageAvailable } from "@/lib/storage/local-storage-health";
 import { getActiveOwnerScope } from "@/lib/storage/scoped-db";
+import { ensureCivilDateNormalization } from "@/lib/services/civil-date-migration";
 
 function byDateDesc(left: TransactionRecord, right: TransactionRecord) {
   return left.transactionDate < right.transactionDate ? 1 : -1;
@@ -21,6 +23,7 @@ function withCorrectedCategory(record: TransactionRecord): TransactionRecord {
 
 export async function listTransactions(params: TransactionListParams = {}, ownerScope = getActiveOwnerScope()) {
   assertLocalStorageAvailable();
+  await ensureCivilDateNormalization(ownerScope);
   const db = getDexieDb();
   const items = await db.transactions
     .where("[ownerScope+status+transactionDate]")
@@ -41,8 +44,10 @@ export async function createTransaction(tx: Omit<TransactionRecord, "nameNormali
   const db = getDexieDb();
 
   const correctedCategory = correctCategoryLabel(tx.categoryName || tx.categoryId);
+  const transactionDate = normalizeCivilDateString(tx.transactionDate);
   const record: TransactionRecord = {
     ...tx,
+    transactionDate,
     categoryName: correctedCategory,
     nameNormalized: normalizeTextForSearch(tx.name),
     categoryNameNormalized: normalizeTextForSearch(correctedCategory),
@@ -55,6 +60,7 @@ export async function createTransaction(tx: Omit<TransactionRecord, "nameNormali
 
 export async function findTransactionById(id: string, ownerScope = getActiveOwnerScope()) {
   assertLocalStorageAvailable();
+  await ensureCivilDateNormalization(ownerScope);
   const db = getDexieDb();
   const tx = await db.transactions.get(id);
   if (!tx || tx.ownerScope !== ownerScope || tx.status !== "active") {
@@ -77,6 +83,10 @@ export async function updateTransaction(id: string, patch: Partial<TransactionRe
     ...patch,
     updatedAt: new Date().toISOString(),
   };
+
+  if (patch.transactionDate !== undefined) {
+    next.transactionDate = normalizeCivilDateString(patch.transactionDate);
+  }
 
   next.categoryName = correctCategoryLabel(next.categoryName || next.categoryId);
 
