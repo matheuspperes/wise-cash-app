@@ -23,7 +23,7 @@ function withCorrectedCategory(record: TransactionRecord): TransactionRecord {
 
 export async function listTransactions(params: TransactionListParams = {}, ownerScope = getActiveOwnerScope()) {
   assertLocalStorageAvailable();
-  await ensureCivilDateNormalization(ownerScope);
+  await ensureCivilDateNormalization();
   const db = getDexieDb();
   const items = await db.transactions
     .where("[ownerScope+status+transactionDate]")
@@ -60,7 +60,7 @@ export async function createTransaction(tx: Omit<TransactionRecord, "nameNormali
 
 export async function findTransactionById(id: string, ownerScope = getActiveOwnerScope()) {
   assertLocalStorageAvailable();
-  await ensureCivilDateNormalization(ownerScope);
+  await ensureCivilDateNormalization();
   const db = getDexieDb();
   const tx = await db.transactions.get(id);
   if (!tx || tx.ownerScope !== ownerScope || tx.status !== "active") {

@@ -52,13 +52,13 @@ export function normalizeCsvToTransactionInput(row: Record<string, string>): Tra
 
   const recurrenceActive = mapRecorrenciaAtiva(row['Recorrencia Ativa'] || 'Nao') ?? false;
 
-  const recurrence = recurrenceActive
+  const recurrence: TransactionInput['recurrence'] = recurrenceActive
     ? {
         enabled: true,
         dayOfMonth: row['Dia da Recorrencia'] ? Number(row['Dia da Recorrencia']) : undefined,
-        recurrenceType: row['Tipo da Recorrencia'] ? mapTipoRecorrencia(row['Tipo da Recorrencia']) : undefined,
+        recurrenceType: row['Tipo da Recorrencia'] ? mapTipoRecorrencia(row['Tipo da Recorrencia']) ?? undefined : undefined,
         maxCycles: row['Quantidade de Meses'] ? Number(row['Quantidade de Meses']) : undefined,
-        unlimitedMode: row['Modo da Recorrencia'] ? mapModoRecorrencia(row['Modo da Recorrencia']) : undefined,
+        unlimitedMode: row['Modo da Recorrencia'] ? mapModoRecorrencia(row['Modo da Recorrencia']) ?? undefined : undefined,
       }
     : { enabled: false };
 

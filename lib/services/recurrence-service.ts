@@ -308,7 +308,7 @@ async function updateRuleProgress(rule: RecurrenceRuleRecord) {
 
 export async function createRecurrenceRule(input: RecurrenceRuleInput, ownerScope = getActiveOwnerScope()): Promise<RecurrenceRuleRecord> {
   assertLocalStorageAvailable();
-  await ensureCivilDateNormalization(ownerScope);
+  await ensureCivilDateNormalization();
 
   const now = new Date().toISOString();
   const db = getDexieDb();
@@ -340,7 +340,7 @@ export async function createRecurrenceRule(input: RecurrenceRuleInput, ownerScop
 
 export async function reconcileRecurrence(ownerScope = getActiveOwnerScope(), referenceDate = new Date()) {
   assertLocalStorageAvailable();
-  await ensureCivilDateNormalization(ownerScope);
+  await ensureCivilDateNormalization();
   const db = getDexieDb();
   const activeRules = await db.recurrenceRules
     .toCollection()
@@ -384,7 +384,7 @@ export async function reconcileRecurrence(ownerScope = getActiveOwnerScope(), re
 
 export async function listRecurrenceRules(ownerScope = getActiveOwnerScope(), referenceDate = new Date()): Promise<RecurrenceRuleListItem[]> {
   assertLocalStorageAvailable();
-  await ensureCivilDateNormalization(ownerScope);
+  await ensureCivilDateNormalization();
   const db = getDexieDb();
   const rules = await db.recurrenceRules
     .toCollection()
@@ -411,7 +411,7 @@ export async function listRecurrenceRules(ownerScope = getActiveOwnerScope(), re
 
 export async function listPendingRecurrenceInstances(ownerScope = getActiveOwnerScope()): Promise<RecurrencePendingItem[]> {
   assertLocalStorageAvailable();
-  await ensureCivilDateNormalization(ownerScope);
+  await ensureCivilDateNormalization();
   const db = getDexieDb();
   const pending = await db.recurrenceInstances
     .where("[ownerScope+status+monthRef]")
@@ -435,7 +435,7 @@ export async function listPendingRecurrenceInstances(ownerScope = getActiveOwner
 
 export async function confirmPendingRecurrenceInstance(id: string, ownerScope = getActiveOwnerScope()) {
   assertLocalStorageAvailable();
-  await ensureCivilDateNormalization(ownerScope);
+  await ensureCivilDateNormalization();
   const db = getDexieDb();
 
   return await db.transaction("rw", [db.recurrenceInstances, db.transactions], async () => {
@@ -481,7 +481,7 @@ export async function confirmPendingRecurrenceInstance(id: string, ownerScope = 
 
 export async function cancelPendingRecurrenceInstance(id: string, ownerScope = getActiveOwnerScope()) {
   assertLocalStorageAvailable();
-  await ensureCivilDateNormalization(ownerScope);
+  await ensureCivilDateNormalization();
   const db = getDexieDb();
 
   return await db.transaction("rw", db.recurrenceInstances, async () => {
@@ -512,7 +512,7 @@ export async function updateRecurrenceRuleForFutureCycles(
   effectiveFromMonthRef = toEffectiveMonthRef(),
 ) {
   assertLocalStorageAvailable();
-  await ensureCivilDateNormalization(ownerScope);
+  await ensureCivilDateNormalization();
   const db = getDexieDb();
   const current = await db.recurrenceRules.get(recurrenceRuleId);
   if (!current || current.ownerScope !== ownerScope) {

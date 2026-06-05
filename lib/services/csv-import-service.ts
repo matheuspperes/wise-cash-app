@@ -58,7 +58,7 @@ export async function parseCsvTemplate(text: string): Promise<CsvImportPreview> 
     }
   }
 
-  const existing = await listLocalTransactions();
+  const existing = await listLocalTransactions({});
   const existingItems = existing.items ?? [];
   const existingKeySet = new Set<string>();
   for (const tx of existingItems) {
@@ -147,7 +147,7 @@ export async function parseCsvTemplate(text: string): Promise<CsvImportPreview> 
 
 export async function confirmCsvImport(preview: CsvImportPreview) {
   let duplicateSkipped = 0;
-  const existing = await listLocalTransactions();
+  const existing = await listLocalTransactions({});
   const existingItems = existing.items ?? [];
   const existingKeySet = new Set<string>();
   for (const tx of existingItems) {
