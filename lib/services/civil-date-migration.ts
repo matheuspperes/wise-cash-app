@@ -36,8 +36,8 @@ export function runCivilDateMigration<T extends TransactionWithDate>(records: T[
   return ensureCivilDateMigration(records);
 }
 
-export async function ensureCivilDateNormalization(_ownerScope?: string): Promise<void> {
+export async function ensureCivilDateNormalization(): Promise<void> {
   return;
 }
 
-export default {};
+export default ensureCivilDateMigration;

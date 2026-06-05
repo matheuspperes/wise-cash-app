@@ -150,4 +150,6 @@ export function shiftMonthRef(monthRef: string, delta: number) {
   return toMonthRef(date);
 }
 
-export default {};
+const civilDateFormatting = {};
+
+export default civilDateFormatting;
