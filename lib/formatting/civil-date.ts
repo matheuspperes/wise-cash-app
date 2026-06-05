@@ -69,7 +69,12 @@ export function monthRefToDate(monthRef: string) {
     throw new Error("monthRef inválido.");
   }
 
-  return new Date(year, month - 1, 1);
+  const date = new Date(year, month - 1, 1);
+  if (!isSameDateParts(date, year, month - 1, 1)) {
+    throw new Error("monthRef inválido.");
+  }
+
+  return date;
 }
 
 export function shiftMonthRef(monthRef: string, delta: number) {
