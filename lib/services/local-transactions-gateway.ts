@@ -54,6 +54,29 @@ export async function createLocalTransaction(input: TransactionInput) {
   }
 }
 
+export async function bulkCreateFromCsv(inputs: TransactionInput[]) {
+  try {
+    assertLocalStorageAvailable();
+    const ownerScope = getActiveOwnerScope();
+    let created = 0;
+    let skipped = 0;
+
+    for (const input of inputs) {
+      try {
+        await createTransactionFromInput(input, ownerScope);
+        created += 1;
+      } catch {
+        skipped += 1;
+      }
+    }
+
+    await reconcileAfterRecurrenceMutation(ownerScope);
+    return { created, skipped };
+  } catch (error) {
+    return mapStorageError(error);
+  }
+}
+
 export async function patchLocalTransaction(id: string, patch: Partial<TransactionInput>) {
   try {
     assertLocalStorageAvailable();
