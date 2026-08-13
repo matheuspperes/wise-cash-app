@@ -1,6 +1,6 @@
 ﻿# wise-cash-app Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-05-18
+Auto-generated from all feature plans. Last updated: 2026-07-06
 
 ## Active Technologies
 - TypeScript 5.x, Node.js 20+ (stack atual), Python 3.11+ quando aplicavel + Next.js 15.x, React 18, npm (operacao atual), uv (padrao para Python) (002-project-ambience-uv)
@@ -51,6 +51,10 @@ Auto-generated from all feature plans. Last updated: 2026-05-18
 - Client-side IndexedDB via Dexie, with transaction and recurrence fields stored as strings (024-fix-recurrence-dates-ui)
 - TypeScript 5.x, React 18, Next.js 15 App Router + Tailwind CSS, shadcn/ui, TanStack Query, React Hook Form, Zod, Dexie (IndexedDB) (025-csv-transaction-import-export)
 - IndexedDB local-first via Dexie (`transactions`, `recurrenceRules`, `recurrenceInstances`, `meta`) (025-csv-transaction-import-export)
+- [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION] + [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION] (026-ui-consistency)
+- [if applicable, e.g., PostgreSQL, CoreData, files or N/A] (026-ui-consistency)
+- TypeScript 5.x, React 18, Next.js 15 (App Router) + Tailwind CSS, shadcn/ui, Radix UI, React Hook Form, Zod, Lucide, Dexie (026-ui-consistency)
+- IndexedDB via Dexie (local-first persistence) (026-ui-consistency)
 
 - TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x) + Next.js, Tailwind CSS, Shadcn/UI, TanStack Query, Supabase JS, Recharts (001-monthly-finance-manager)
 
@@ -71,9 +75,9 @@ npm test; npm run lint
 TypeScript 5.x + React 18 + Next.js App Router (Next.js 15.x): Follow standard conventions
 
 ## Recent Changes
+- 026-ui-consistency: Added TypeScript 5.x, React 18, Next.js 15 (App Router) + Tailwind CSS, shadcn/ui, Radix UI, React Hook Form, Zod, Lucide, Dexie
+- 026-ui-consistency: Added [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION] + [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
 - 025-csv-transaction-import-export: Added TypeScript 5.x, React 18, Next.js 15 App Router + Tailwind CSS, shadcn/ui, TanStack Query, React Hook Form, Zod, Dexie (IndexedDB)
-- 025-csv-transaction-import-export: Added TypeScript 5.x, React 18, Next.js 15 App Router + Tailwind CSS, shadcn/ui, TanStack Query, React Hook Form, Zod, Dexie (IndexedDB)
-- 024-fix-recurrence-dates-ui: Added TypeScript 5.8 with Next.js 15 and React 18 + Next.js, React Hook Form, Zod, Dexie, TanStack Query, Intl APIs
 
 
 <!-- MANUAL ADDITIONS START -->

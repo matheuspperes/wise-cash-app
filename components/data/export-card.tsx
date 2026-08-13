@@ -22,7 +22,7 @@ export function ExportCard({ onExport, isExporting }: Props) {
   };
 
   return (
-    <section className="rounded-2xl border border-border bg-surface p-4 shadow-card">
+    <section className="flex h-full flex-col rounded-2xl border border-border bg-surface p-4 shadow-card">
       <h3 className="text-base font-semibold">Exportar CSV</h3>
       <p className="text-sm text-muted-foreground">
         Gere um arquivo no mesmo formato do modelo. Se quiser, filtre por periodo.

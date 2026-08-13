@@ -29,7 +29,6 @@ export function CurrentMonthExpensesTable({ rows, isFetching = false }: Props) {
                 <th className="py-2 pr-4 font-medium">{uiText.columnDate}</th>
                 <th className="py-2 pr-4 font-medium">{uiText.columnDescription}</th>
                 <th className="py-2 pr-4 font-medium">{uiText.columnCategory}</th>
-                <th className="py-2 pr-4 font-medium">{uiText.columnType}</th>
                 <th className="py-2 text-right font-medium">{uiText.columnValue}</th>
               </tr>
             </thead>
@@ -39,7 +38,6 @@ export function CurrentMonthExpensesTable({ rows, isFetching = false }: Props) {
                   <td className="whitespace-nowrap py-2 pr-4">{formatDateBR(row.date)}</td>
                   <td className="py-2 pr-4">{row.description}</td>
                   <td className="py-2 pr-4">{correctCategoryLabel(row.category)}</td>
-                  <td className="py-2 pr-4">{row.type === "income" ? uiText.typeIncome : uiText.typeExpense}</td>
                   <td className={cn("whitespace-nowrap py-2 text-right font-semibold", row.type === "income" ? "text-emerald-400" : "text-danger")}>
                     {row.type === "income" ? "+" : "-"}
                     {formatCurrencyBRL(row.value)}

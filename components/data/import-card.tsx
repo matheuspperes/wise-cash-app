@@ -10,7 +10,7 @@ type Props = {
 
 export function ImportCard({ onFileChange, isParsing, error }: Props) {
   return (
-    <section className="rounded-2xl border border-border bg-surface p-4 shadow-card">
+    <section className="flex h-full flex-col rounded-2xl border border-border bg-surface p-4 shadow-card">
       <h2 className="text-base font-semibold">Importar CSV</h2>
       <p className="text-sm text-muted-foreground">
         Selecione o arquivo no modelo unico para validar antes de confirmar.

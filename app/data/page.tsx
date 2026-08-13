@@ -119,8 +119,8 @@ export default function DataImportPage() {
     <main className="mx-auto flex max-w-[76.8rem] flex-col gap-5 px-5 pb-20 pt-5">
       <DashboardHeader title="Dados" />
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="flex flex-col gap-4">
+      <div className="grid items-stretch gap-4 md:grid-cols-2">
+        <div className="flex h-full flex-col gap-4">
           <ImportCard onFileChange={onFileChange} isParsing={isParsing} error={error} />
 
           {preview ? (
@@ -135,12 +135,12 @@ export default function DataImportPage() {
           ) : null}
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex h-full flex-col gap-4">
           <ExportCard onExport={onExport} isExporting={isExporting} />
         </div>
       </div>
 
-      <div>
+      <div className="flex h-full flex-col">
         <ModelDownloadCard onDownload={onDownloadModel} isDownloading={isDownloadingModel} />
       </div>
     </main>

@@ -438,7 +438,6 @@ export default function TransactionsPageClient() {
         <td className="whitespace-nowrap py-2 pr-4">{formatDateBR(item.transactionDate)}</td>
         <td className="py-2 pr-4">{item.name}</td>
         <td className="py-2 pr-4">{item.categoryName}</td>
-        <td className="whitespace-nowrap py-2 pr-4">{item.type === "income" ? uiText.typeIncome : uiText.typeExpense}</td>
         <td className={item.type === "income" ? "whitespace-nowrap py-2 text-right font-semibold text-emerald-400" : "whitespace-nowrap py-2 text-right font-semibold text-danger"}>
           {item.type === "income" ? "+" : "-"}{formatCurrencyBRL(item.amount)}
         </td>
@@ -529,7 +528,6 @@ export default function TransactionsPageClient() {
                       <th className="py-2 pr-4 font-medium">{uiText.columnDate}</th>
                       <th className="py-2 pr-4 font-medium">{uiText.columnDescription}</th>
                       <th className="py-2 pr-4 font-medium">{uiText.columnCategory}</th>
-                      <th className="py-2 pr-4 font-medium">{uiText.columnType}</th>
                       <th className="py-2 text-right font-medium">{uiText.columnValue}</th>
                     </tr>
                   </thead>
@@ -560,7 +558,6 @@ export default function TransactionsPageClient() {
                         <th className="py-2 pr-4 font-medium">{uiText.columnDate}</th>
                         <th className="py-2 pr-4 font-medium">{uiText.columnDescription}</th>
                         <th className="py-2 pr-4 font-medium">{uiText.columnCategory}</th>
-                        <th className="py-2 pr-4 font-medium">{uiText.columnType}</th>
                         <th className="py-2 text-right font-medium">{uiText.columnValue}</th>
                         <th className="py-2 pl-4 text-right font-medium">Ações</th>
                       </tr>

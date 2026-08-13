@@ -4,10 +4,11 @@ import * as Dialog from "@radix-ui/react-dialog";
 
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
+import { extractDigits, formatBrlFromDigits, parseBrlDisplayToAmount } from "@/lib/formatting/brl-currency-mask";
 import { getCategoryPresetsByType } from "@/lib/ui/transaction-category-presets";
 import { MonthlyTransactionHistoryRow } from "@/lib/ui/dashboard-history-types";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
 type EditPayload = {
   transactionDate: string;
@@ -37,37 +38,8 @@ type Props = {
   successMessage?: string | null;
 };
 
-function amountToInputValue(value: number) {
-  return new Intl.NumberFormat("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
-}
-
-function parseAmount(input: string) {
-  const normalized = input.trim();
-
-  if (!normalized) {
-    return NaN;
-  }
-
-  const sanitized = normalized.replace(/[^\d.,-]/g, "");
-  const lastComma = sanitized.lastIndexOf(",");
-  const lastDot = sanitized.lastIndexOf(".");
-  const decimalSeparatorIndex = Math.max(lastComma, lastDot);
-
-  if (decimalSeparatorIndex === -1) {
-    return Number(sanitized.replace(/[^\d-]/g, ""));
-  }
-
-  const integerPart = sanitized
-    .slice(0, decimalSeparatorIndex)
-    .replace(/[^\d-]/g, "");
-  const decimalPart = sanitized
-    .slice(decimalSeparatorIndex + 1)
-    .replace(/[^\d]/g, "");
-
-  return Number(`${integerPart}.${decimalPart}`);
+function amountToMaskValue(value: number) {
+  return formatBrlFromDigits(String(Math.round(value * 100)));
 }
 
 export function TransactionHistoryEditDrawer({
@@ -87,6 +59,7 @@ export function TransactionHistoryEditDrawer({
     handleSubmit,
     formState: { errors },
     setError,
+    control,
   } = useForm<FormData>({
     defaultValues: {
       transactionDate: "",
@@ -110,15 +83,15 @@ export function TransactionHistoryEditDrawer({
       description: transaction.description,
       categoryId: transaction.category,
       type: transaction.type,
-      amount: amountToInputValue(transaction.amount),
+      amount: amountToMaskValue(transaction.amount),
       notes: transaction.notes ?? "",
     });
   }, [transaction, reset]);
 
   async function submit(data: FormData) {
-    const parsedAmount = parseAmount(data.amount);
+    const parsedAmount = parseBrlDisplayToAmount(data.amount);
     if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
-      setError("amount", { message: "Informe um valor numerico valido." });
+      setError("amount", { message: "Informe um valor numérico válido." });
       return;
     }
 
@@ -172,7 +145,23 @@ export function TransactionHistoryEditDrawer({
             </Select>
             {errors.categoryId ? <p className="text-xs text-danger">{errors.categoryId.message}</p> : null}
 
-            <Input inputMode="decimal" placeholder="Valor" {...register("amount", { required: "Valor obrigatório" })} />
+            <Controller
+              control={control}
+              name="amount"
+              render={({ field }) => (
+                <Input
+                  inputMode="numeric"
+                  onBlur={field.onBlur}
+                  onChange={(event) => {
+                    const digits = extractDigits(event.target.value);
+                    field.onChange(formatBrlFromDigits(digits));
+                  }}
+                  placeholder="Valor"
+                  value={field.value}
+                />
+              )}
+              rules={{ required: "Valor obrigatório" }}
+            />
             {errors.amount ? <p className="text-xs text-danger">{errors.amount.message}</p> : null}
 
             <Input placeholder="Observação / notas" {...register("notes")} />

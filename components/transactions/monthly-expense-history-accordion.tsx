@@ -58,7 +58,6 @@ export function MonthlyExpenseHistoryAccordion({ groups, isLoading = false, onEd
                       <th className="py-2 pr-4 font-medium">Data</th>
                       <th className="py-2 pr-4 font-medium">Descrição</th>
                       <th className="py-2 pr-4 font-medium">Categoria</th>
-                      <th className="py-2 pr-4 font-medium">Tipo</th>
                       <th className="py-2 text-right font-medium">Valor</th>
                       <th className="py-2 pl-4 text-right font-medium">Ações</th>
                     </tr>
@@ -69,7 +68,6 @@ export function MonthlyExpenseHistoryAccordion({ groups, isLoading = false, onEd
                         <td className="whitespace-nowrap py-2 pr-4">{formatDateBR(row.date)}</td>
                         <td className="py-2 pr-4">{row.description}</td>
                         <td className="py-2 pr-4">{correctCategoryLabel(row.category)}</td>
-                        <td className="whitespace-nowrap py-2 pr-4">{row.type === "income" ? uiText.typeIncome : uiText.typeExpense}</td>
                         <td className={row.type === "income" ? "whitespace-nowrap py-2 text-right font-semibold text-emerald-400" : "whitespace-nowrap py-2 text-right font-semibold text-danger"}>
                           {row.type === "income" ? "+" : "-"}{formatCurrencyBRL(row.amount)}
                         </td>
